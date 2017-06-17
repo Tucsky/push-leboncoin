@@ -2,4 +2,6 @@ node_modules/
 jspm_packages/
 .npm
 .env
+credentials.json
+tokens.json
 public/img/leboncoin/*
