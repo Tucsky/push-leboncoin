@@ -1,0 +1,53 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<title>{push} leboncoin</title>
+	<meta name="description" content="Notification center">
+	<meta name="author" content="Tucsky">
+	
+	<link rel="icon" type="image/png" href="favicon.png">
+	<link rel="manifest" href="manifest.json">
+
+	<link rel="stylesheet" href="app.min.css">
+	<!--[if lt IE 9]>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+	<![endif]-->
+
+</head>
+
+<body>
+	<div id="ohsnap"></div>
+
+	<div class="container">
+		<h1>{push} <div class="hidden-sm-down">leboncoin</div></h1>
+		<div class="row row-masonry">
+			<div class="grid-sizer col-xs-12 col-sm-6 col-md-4"></div>
+			<div class="grid-item col-xs-12 col-sm-6 col-md-4">
+				<div id="registerBlock" class="card card-inverse" style="background-color: #333; border-color: #333;">
+					<div class="card-block">
+						<h4 class="card-title">Register</h4>
+						<p class="card-text">Click on the button bellow to enable notifications.</p>
+						<a href="#" class="btn btn-primary" data-action="subscribe">Subscribe</a>
+					</div>
+				</div>
+				<div id="registrationBlock" class="card card-inverse" style="background-color: #333; border-color: #333; display:none">
+					<div class="card-block">
+						<h4 class="card-title">You are in !</h4>
+						<p class="card-text">Here is your registration token.</p>
+						<div class="form-group">
+							<input type="text" readonly class="form-control token" placeholder="Token">
+						</div>
+						<a href="#" class="btn btn-danger" data-action="unsubscribe">Unsubscribe</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="app.min.js"></script>
+</body>
+</html>

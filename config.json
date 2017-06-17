@@ -1,0 +1,28 @@
+{
+	"url": "https://www.leboncoin.fr/velos/offres/ile_de_france/?th=1&w=4&latitude=48.868630&longitude=2.201012&radius=10000&ps=5&pe=12",
+	"whitelist": [
+	],
+	"blacklist": [
+		"14 pouce",
+		"15 pouce",
+		"16 pouce",
+		"17 pouce",
+		"18 pouce",
+		"19 pouce",
+		"20 pouce",
+		"22 pouce",
+		"24 pouce",
+		"tricycle",
+		"monocycle",
+		"appartement",
+		"pliant",
+		"dame",
+		"enfant",
+		"femme",
+		"fille",
+		"garçon",
+		"garcon",
+		"trottinette",
+		"adolescent"
+	]
+}

@@ -24,11 +24,21 @@ app.use(express.static('public'));
 */
 
 var tokens = require('./tokens.json') || [],
+	config = require('./config.json') || {},
 	offers = [],
 	offers_ids = [];
 	notified = null;
 
-console.log('[tokens] '+tokens.length+' tokens loaded');
+config = Object.assign({
+	url: 'https://www.leboncoin.fr/velos/offres/ile_de_france/?th=1&w=4&latitude=48.868630&longitude=2.201012&radius=10000&ps=5&pe=12',
+	blacklist: [],
+	whitelist: []
+}, config);
+
+console.log("[tokens] "+tokens.length+" tokens loaded");
+console.log('[url] Using "'+config.url+'"');
+console.log("[keywords]\n\t- Whitelist: "+config.whitelist.join(', ')+"\n\t- Blacklist: "+config.blacklist.join(', '));
+console.log("\n");
 
 /* Routes
 */
@@ -79,8 +89,10 @@ app.post('/unsubscribe', function (req, res) {
 
 app.post('/offers', function (req, res) {
 	var page = req.body.page || 0,
-		items = offers.slice(page * 15, 15);
-	return res.json({success: true, offers: offers});
+		offset = page * 15;
+		items = offers.slice(offset, offset + 15);
+		
+	return res.json({success: true, offers: items});
 })
 
 app.get('/', function (req, res) {
@@ -138,7 +150,7 @@ var scrape = function(uri, callback, headers) {
 };
 
 var getOffers = function() {
-	var url = 'https://www.leboncoin.fr/velos/offres/ile_de_france/?th=1&w=4&latitude=48.868630&longitude=2.201012&radius=10000&ps=5&pe=12';
+	var url = config.url;
 
 	console.log('[scraper] Get offers');
 
@@ -203,32 +215,14 @@ var parseOffer = function($) {
 
 		offer.address = $('.line_city .value').text().trim();
 		offer.title = $('h1').text().trim();
-		offer.description = $('.properties_description .value').text().trim();
+		offer.description = $('.properties_description .value').html().trim();
 		offer.price = $('.item_price').attr('content');
 
-		if (new RegExp([
-			'enfant',
-			'femme',
-			'fille',
-			'garçon',
-			'garcon',
-			'14 pouce',
-			'15 pouce',
-			'16 pouce',
-			'17 pouce',
-			'18 pouce',
-			'19 pouce',
-			'20 pouce',
-			'22 pouce',
-			'24 pouce',
-			'tricycle',
-			'monocycle',
-			'appartement',
-			'pliant',
-			'dame',
-			'trottinette',
-		].join("|")).test((offer.title+' '+offer.description).toLowerCase()))
-			return console.info('[scraper] Offer#'+id+' has bad keyword');
+		if (config.whitelist.length && !new RegExp(config.whitelist.join('|')).test((offer.title+' '+offer.description).toLowerCase()))
+			return console.info('[scraper] Offer#'+id+' does not contain any whitelisted keyword');
+
+		if (config.blacklist.length && new RegExp(config.blacklist.join('|')).test((offer.title+' '+offer.description).toLowerCase()))
+			return console.info('[scraper] Offer#'+id+' contains bad keyword(s)');
 
 		offer = offers[offers.push(offer) - 1];
 
@@ -306,12 +300,12 @@ var sendNotifications = function() {
 	if (notified === null)
 		notified = offers.length - 1;
 
-	console.log('slice', notified, offers.length - notified);
+	console.log('slice', notified, offers.length);
 
-	var data = offers.slice(notified, offers.length - notified);
+	var data = offers.slice(notified, offers.length);
 
 	if (!data.length)
-		return console.error('0 offers, aborting...');
+		return console.error('[messaging] 0 offers, aborting...');
 
 	//data.splice(0, 4);
 

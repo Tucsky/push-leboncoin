@@ -1,0 +1,33 @@
+{
+  "name": "oh-snap",
+  "main": "ohsnap.js",
+  "homepage": "https://github.com/justindominbue/ohSnap",
+  "authors": [
+    "justindomingue <justin.domingue@hotmail.com>"
+  ],
+  "description": "A simple jQuery/Zepto notification library designed to be used in mobile apps",
+  "keywords": [
+    "notification",
+    "mobile",
+    "jquery",
+    "zepto"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "_release": "3ef7eb58b3",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "3ef7eb58b3026ef03d9344cb6eff4699d15cb5f5"
+  },
+  "_source": "https://github.com/justindomingue/ohSnap.git",
+  "_target": "*",
+  "_originalSource": "oh-snap",
+  "_direct": true
+}

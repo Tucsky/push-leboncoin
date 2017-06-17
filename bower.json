@@ -1,0 +1,20 @@
+{
+  "name": "push-leboncoin",
+  "description": "",
+  "main": "server.js",
+  "authors": [
+    "Kevin Rostagni"
+  ],
+  "license": "ISC",
+  "homepage": "",
+  "private": true,
+  "dependencies": {
+    "bowser": "^1.6.1",
+    "masonry": "^4.1.1",
+    "bootstrap": "v4.0.0-alpha.6",
+    "selectize": "^0.12.4",
+    "oh-snap": "*",
+    "moment": "^2.18.1",
+    "font-awesome": "fontawesome#^4.7.0"
+  }
+}

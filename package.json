@@ -9,7 +9,7 @@
   },
   "author": "Kevin Rostagni",
   "license": "ISC",
-  "dependencies": {
+  "devDependencies": {
     "body-parser": "^1.17.2",
     "bootstrap": "^4.0.0-alpha.6",
     "cheerio": "^1.0.0-rc.1",
@@ -17,6 +17,13 @@
     "firebase-admin": "^5.0.0",
     "moment": "^2.18.1",
     "request": "^2.81.0",
-    "windows-1252": "^1.0.0"
+    "windows-1252": "^1.0.0",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^4.0.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-iconfont": "^8.0.1",
+    "gulp-iconfont-css": "^2.1.0",
+    "gulp-sass": "^3.1.0",
+    "gulp-uglify": "^3.0.0"
   }
 }
