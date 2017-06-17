@@ -4,4 +4,3 @@ jspm_packages/
 .env
 credentials.json
 tokens.json
-public/img/leboncoin/*
