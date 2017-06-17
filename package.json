@@ -1,0 +1,22 @@
+{
+  "name": "push-leboncoin",
+  "version": "0.1",
+  "description": "NodeJS app that scrap leboncoin.fr every minutes with the latest offers then send push notifications",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Kevin Rostagni",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "bootstrap": "^4.0.0-alpha.6",
+    "cheerio": "^1.0.0-rc.1",
+    "express": "^4.15.3",
+    "firebase-admin": "^5.0.0",
+    "moment": "^2.18.1",
+    "request": "^2.81.0",
+    "windows-1252": "^1.0.0"
+  }
+}

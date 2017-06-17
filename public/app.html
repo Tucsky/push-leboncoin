@@ -1,0 +1,65 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<title>1337</title>
+	<meta name="description" content="Notification center">
+	<meta name="author" content="Tucsky">
+	
+	<link rel="icon" type="image/png" href="favicon.png">
+	<link rel="manifest" href="manifest.json">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+	<link rel="stylesheet" href="app.css">
+	<!--[if lt IE 9]>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+	<![endif]-->
+</head>
+
+<body>
+	<div id="snap"></div>
+
+	<div class="container">
+		<h1>{push}</h1>
+		<div class="row">
+			<div class="col-xs-12 col-sm-6 col-md-4">
+				<div id="registerBlock" class="card" style="display:none">
+					<div class="card-block">
+						<h4 class="card-title">Register</h4>
+						<p class="card-text">Click on the button bellow to enable notifications.</p>
+						<a href="#" class="btn btn-primary" data-action="subscribe">Subscribe</a>
+					</div>
+				</div>
+				<div id="registrationBlock" class="card" style="display:none">
+					<div class="card-block">
+						<h4 class="card-title">Your account</h4>
+						<p class="card-text">Here is a summary of your activities.</p>
+						<div class="form-group">
+							<input type="text" readonly class="form-control token" placeholder="Token">
+						</div>
+						<a href="#" class="btn btn-primary" data-action="unsubscribe">Unsubscribe</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+	<script src="https://www.gstatic.com/firebasejs/4.1.1/firebase.js"></script>
+	<script src="snap.min.js"></script>
+	<script src="app.js"></script>
+
+	<script>
+		$(document).ready(function() {
+			checkSubscription();
+		});
+
+		$('[data-action=subscribe]').on('click', subscribe);
+		$('[data-action=unsubscribe]').on('click', unsubscribe);
+	</script>
+</body>
+</html>
