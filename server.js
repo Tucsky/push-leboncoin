@@ -7,18 +7,27 @@ var request = require('request');
 var moment = require('moment');
 var windows1252 = require('windows-1252');
 
-admin.initializeApp({
-	credential: admin.credential.cert(require('./credentials.json')),
-	databaseURL: "https://project-2792471436428079009.firebaseio.com"
-});
-
-var app = express();
-	app.use(bodyParser.json());
-	app.use(bodyParser.urlencoded({
-		extended: true
-	}));
-
-app.use(express.static('public'));
+/* Create config & credential files if they are missing
+*/
+if (!fs.existsSync('tokens.json'))
+	fs.writeFileSync('tokens.json', '[]', {flag: 'wx'});
+if (!fs.existsSync('credentials.json')) {
+	fs.writeFileSync('tokens.json', JSON.stringify({
+		type: '',
+		project_id: '',
+		private_key_id: '',
+		private_key: '',
+		client_email: '',
+		client_id: '',
+		auth_uri: '',
+		token_uri: '',
+		auth_provider_x509_cert_url: '',
+		client_x509_cert_url: ''
+	}), {flag: 'wx'});
+	console.log("[critical] You need to add your own Firebase service account key file\n\n"
+	+"MORE INFO:\nhttps://console.firebase.google.com/u/0/project/*YOUR PROJECT*/settings/serviceaccounts/adminsdk");
+	process.exit();
+}
 
 /* Storage
 */
@@ -39,6 +48,22 @@ console.log("[tokens] "+tokens.length+" tokens loaded");
 console.log('[url] Using "'+config.url+'"');
 console.log("[keywords]\n\t- Whitelist: "+config.whitelist.join(', ')+"\n\t- Blacklist: "+config.blacklist.join(', '));
 console.log("\n");
+
+/* Core (Express + Firebase Admin)
+*/
+
+admin.initializeApp({
+	credential: admin.credential.cert(require('./credentials.json')),
+	databaseURL: "https://project-2792471436428079009.firebaseio.com"
+});
+
+var app = express();
+	app.use(bodyParser.json());
+	app.use(bodyParser.urlencoded({
+		extended: true
+	}));
+
+app.use(express.static('public'));
 
 /* Routes
 */
@@ -99,9 +124,32 @@ app.get('/', function (req, res) {
 	return res.sendFile(__dirname+'/public/app.html');
 })
 
+/* Startup
+*/
+
 app.listen(1337, function () {
 	console.log('listening on port 1337')
 });
+
+/* Listen to CLI inputs
+*/
+
+process.stdin.resume();
+process.stdin.setEncoding('utf8');
+
+process.stdin.on('data', function(text) {
+	switch (text.trim()) {
+		case 'send':
+			send();
+		break;
+		case 'scrape':
+			getOffers();
+		break;
+	}
+});
+
+/* App related function
+*/
 
 var save = function() {
 	fs.writeFile('tokens.json', JSON.stringify(tokens), 'utf8', function() {
@@ -331,19 +379,5 @@ var sendNotifications = function() {
 
 	notified += data.length;
 }
-
-process.stdin.resume();
-process.stdin.setEncoding('utf8');
-
-process.stdin.on('data', function(text) {
-	switch (text.trim()) {
-		case 'send':
-			send();
-		break;
-		case 'scrape':
-			getOffers();
-		break;
-	}
-});
 
 getOffers();
