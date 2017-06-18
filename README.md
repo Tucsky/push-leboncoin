@@ -1,6 +1,6 @@
 # push-leboncoin
 Basicaly this is a implemtation of the Firebase cloud messaging quickstart for NodeJS<bt>
-The app itself scrap leboncoin.fr every minutes with the latest offers then send push notifications<br><br>
+The app itself scrap leboncoin.fr every minutes with the latest offers then send push notifications<br>
 
 - **Scrap le contenu d'un feed leboncoin**
 - **Formate les données, filtre par mot-clé(s)** (nom / description d'annonce)
@@ -23,10 +23,28 @@ Timeout 3 minutes puis scrape la liste à nouveau, et pour toutes les nouvelles 
 
 **Pour enregistrer son appareil afin qu'il reçoive les notifications** allez sur la web app [localhost:1337](http://localhost:1337) (par défaut) et acceptez les permissions du navigateur (Chrome, Firefox, Chrome Android etc...)
 
+## Configuration
+Les configurations se situent dans [config.js](config.js)
+
+| Propriété | Description |
+| ------ | ------ |
+| url | Url leboncoin.fr pointant vers une liste d'annonces filtrée |
+| port | Port du serveur |
+| whitelist | Mot clés obligatoires dans la fiche de l'annonce (optionnel) |
+| blacklist | Mot clés interdits dans la fiche de l'annonce (optionnel) |
+| interval | Intervale de récupération des dernieres annonces (en ms) |
+| countdown | Delais d'envois des notifications push (en ms, après récupération des annonces) |
+
 ## Développement
 Le backend se situe dans [server.js](server.js), le front dans [public](public/) avec la logique frontend dans [public](public/vendor/app.js))<br>
-Le projet utilise gulp pour rassembler les ressources front en 2 fichiers app.min.js/css. 
+Le projet utilise gulp pour minifier les ressources front en 2 fichiers app.min.js/css.<br>
 
+Installez **gulp** si vous ne l'avez pas déjà fait<br>
+```js
+npm install -g gulp
+```
+
+Pour activer la compilation automatique du sass à la sauvegarde (et la minification automatique des fichiers .js)
 ```js
 gulp watch
 ```
