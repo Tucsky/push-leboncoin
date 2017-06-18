@@ -45,6 +45,7 @@ gulp.task('js', function() {
 		bowerPath+'firebase/firebase.js',
 
 		// App
+		bowerPath+'../firebase-messaging-sw.js',
 		bowerPath+'app.js',
 		
 	])

@@ -1,6 +1,8 @@
-importScripts('https://www.gstatic.com/firebasejs/4.1.1/firebase-app.js');
-importScripts('https://www.gstatic.com/firebasejs/4.1.1/firebase-messaging.js');
-importScripts('https://www.gstatic.com/firebasejs/4.1.1/firebase.js');
+if (typeof importScripts === 'function') {
+	importScripts('https://www.gstatic.com/firebasejs/4.1.1/firebase-app.js');
+	importScripts('https://www.gstatic.com/firebasejs/4.1.1/firebase-messaging.js');
+	importScripts('https://www.gstatic.com/firebasejs/4.1.1/firebase.js');
+}
 
 var config = {
 	apiKey: "AIzaSyCRSoBL6dKwZ-jlp22oXagCRVIKFOQBsvs",
@@ -12,3 +14,9 @@ var config = {
 };
 
 firebase.initializeApp(config);
+
+var messaging = firebase.messaging();
+
+	messaging.setBackgroundMessageHandler(function(payload) {
+		return self.registration.showNotification('title', {body: 'body'});
+	});

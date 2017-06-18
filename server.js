@@ -9,22 +9,34 @@ var windows1252 = require('windows-1252');
 
 /* Create config & credential files if they are missing
 */
+
+if (!fs.existsSync('config.json'))
+	fs.writeFileSync('tokens.json', JSON.stringify({
+		"filters": "https://www.leboncoin.fr/velos/offres/ile_de_france/?th=1&w=4&latitude=48.868630&longitude=2.201012&radius=10000&ps=5&pe=12",
+		"port": 1337,
+		"whitelist": [],
+		"blacklist": [],
+		"interval": 1000*60*3,
+		"countdown": 1000*10,
+	}), {flag: 'wx'});
+
 if (!fs.existsSync('tokens.json'))
 	fs.writeFileSync('tokens.json', '[]', {flag: 'wx'});
+
 if (!fs.existsSync('credentials.json')) {
-	fs.writeFileSync('tokens.json', JSON.stringify({
-		type: '',
-		project_id: '',
-		private_key_id: '',
-		private_key: '',
-		client_email: '',
-		client_id: '',
-		auth_uri: '',
-		token_uri: '',
-		auth_provider_x509_cert_url: '',
-		client_x509_cert_url: ''
+	fs.writeFileSync('credentials.json', JSON.stringify({
+		"type": '',
+		"project_id": '',
+		"private_key_id": '',
+		"private_key": '',
+		"client_email": '',
+		"client_id": '',
+		"auth_uri": '',
+		"token_uri": '',
+		"auth_provider_x509_cert_url": '',
+		"client_x509_cert_url": ''
 	}), {flag: 'wx'});
-	console.log("[critical] You need to add your own Firebase service account key file\n\n"
+	console.log("[critical] You need to add your own Firebase service account key file (see README.md #requirements)\n\n"
 	+"MORE INFO:\nhttps://console.firebase.google.com/u/0/project/*YOUR PROJECT*/settings/serviceaccounts/adminsdk");
 	process.exit();
 }
@@ -54,7 +66,6 @@ console.log("\n");
 
 admin.initializeApp({
 	credential: admin.credential.cert(require('./credentials.json')),
-	databaseURL: "https://project-2792471436428079009.firebaseio.com"
 });
 
 var app = express();
@@ -127,8 +138,8 @@ app.get('/', function (req, res) {
 /* Startup
 */
 
-app.listen(1337, function () {
-	console.log('listening on port 1337')
+app.listen(config.port, function () {
+	console.log("\nlistening on port "+config.port+"\n");
 });
 
 /* Listen to CLI inputs
@@ -159,19 +170,21 @@ var save = function() {
 
 var download = function(uri, path, callback){
 	if (fs.existsSync(path)) {
-		console.log('[download] File already exists');
-		return callback();
-	}
 
-	console.log('[image] Downloading "'+uri+'"');
+		// File already exists
+		return callback();
+
+	}
 
 	request.head(uri, function(err, res, body) {
 		if (err)
 			return console.error(err);
 
 		request(uri).pipe(fs.createWriteStream(path)).on('close', function() {
-			console.log('[image] "'+uri+'" saved to '+path);
+			
+			console.log('[image] Downloaded "'+uri+'"');
 			callback();
+
 		});
 	});
 };
@@ -197,10 +210,19 @@ var scrape = function(uri, callback, headers) {
 	});
 };
 
-var getOffers = function() {
+var getOffers = function(callback) {
 	var url = config.url;
 
-	console.log('[scraper] Get offers');
+	console.log('[scraper] Initiate request GET');
+	var count = 0;
+
+	var done = function(callback) {
+		var added = offers.length - beforeCount;
+		console.log('[scraper] '+added+' offer'+(added > 1 ? 's' : '')+' added');
+
+		if (typeof callback === 'function')
+			callback(offers, added);
+	}
 
 	scrape(url, function(body) {
 		if (body === false)
@@ -209,38 +231,51 @@ var getOffers = function() {
 		var $ = cheerio.load(body);
 		var items = $('.tabsContent a.list_item:first-child');
 
-		console.log('[scraper] '+items.length+' offer(s) detected');
+		//console.log('[scraper] '+items.length+' offer'+(items.length > 1 ? 's' : '')+' in the page');
 
 		items.each(function(index) {
-			parseOffer.apply(this, [$])
+
+			// Parse id (from list)
+			var id = $(this).find('.saveAd').data('savead-id');
+
+			// Parse date (from list)
+			var $date = $(this).find('.item_absolute .item_supp'),
+				date = $date.text().trim().split(','),
+				date = moment($date.attr('content')+(date.length == 2 ? ' '+date[1].trim() : ''));
+
+			var offer = {
+				id: id,
+				date: date,
+				images: [],
+				latlng: null,
+			};
+
+			// Only scrap offer once
+			if (offers_ids.indexOf(offer.id) !== -1) {
+				return; //console.log('[scraper] Offer#'+id+' already scraped');
+			}
+			
+			// Register offer (id only, saving the whole object later)
+			offers_ids.push(offer.id);
+
+			parseOffer.apply(this, [offer]);
+
+			count++;
 		});
 	})
 
-	console.log('[scraper] Done');
+	// 10 sec delay before sending the notifications to be sure that the images are up and everythings alright
+	setTimeout(sendNotifications, config.countdown);
 
-	setTimeout(sendNotifications, 1000*10);
+	// Delay in ms before getting new results
+	setTimeout(getOffers, config.interval);
 
-	setTimeout(getOffers, 1000*60*3);
 };
 
-var parseOffer = function($) {
+var parseOffer = function(offer) {
 	var url = 'https://www.leboncoin.fr/velos/';
 
-	// Parse id
-	var id = $(this).find('.saveAd').data('savead-id');
-
-	// Parse date
-	var $date = $(this).find('.item_absolute .item_supp'),
-		date = $date.text().trim().split(','),
-		date = moment($date.attr('content')+(date.length == 2 ? ' '+date[1].trim() : ''));
-
-	// Only scrap offer once
-	if (offers_ids.indexOf(id) !== -1)
-		return console.log('[scraper] Offer#'+id+' already scraped');
-		
-	offers_ids.push(id);
-
-	scrape(url+id+'.htm', function(body) {
+	scrape(url+offer.id+'.htm', function(body) {
 		if (body === false)
 			return;
 
@@ -252,25 +287,16 @@ var parseOffer = function($) {
 			lng: null,
 		};
 
-		console.log('[req] Parse new offer#'+id);
-
-		var offer = {
-			id: id,
-			date: date,
-			images: [],
-			latlng: null,
-		};
-
 		offer.address = $('.line_city .value').text().trim();
 		offer.title = $('h1').text().trim();
 		offer.description = $('.properties_description .value').html().trim();
 		offer.price = $('.item_price').attr('content');
 
 		if (config.whitelist.length && !new RegExp(config.whitelist.join('|')).test((offer.title+' '+offer.description).toLowerCase()))
-			return console.info('[scraper] Offer#'+id+' does not contain any whitelisted keyword');
+			return console.info('[scraper] Exclude offer #'+offer.id+' (not whitelisted)');
 
 		if (config.blacklist.length && new RegExp(config.blacklist.join('|')).test((offer.title+' '+offer.description).toLowerCase()))
-			return console.info('[scraper] Offer#'+id+' contains bad keyword(s)');
+			return console.info('[scraper] Exclude offer #'+offer.id+' (blacklisted)');
 
 		offer = offers[offers.push(offer) - 1];
 
@@ -284,7 +310,6 @@ var parseOffer = function($) {
 				if (match && match[1] && match[1].length > 2 && match[1].length < 32) {
 					value = match[1].trim();
 					latlng[key] = value;
-					console.log('[parser/latlng] '+key+' found', value);
 				} else {
 					return console.error('[parser/latlng] No '+key+' found');
 				}
@@ -308,13 +333,11 @@ var parseOffer = function($) {
 
 					if (match && match.length == 2 && match[1].trim().length) {
 						var url = 'http:'+match[1].trim(),
-							filename = id+'_'+i+'.jpg';
+							filename = offer.id+'_'+i+'.jpg';
 
 						download(url, imagePath+filename, function() {
 							offer.images.push(filename);
 						});
-					} else {
-						//console.log('[image] Image#'+i+' not set');
 					}
 				}
 			} else {
@@ -322,15 +345,17 @@ var parseOffer = function($) {
 				console.log($.html());
 			}
 		} else {
-			console.log('[image] 0 additional pictures detected');
+
+			// 0 additional pictures detected
 
 			$cover = $('meta[property="og:image"]');
 
 			if ($cover.length) {
-				console.log('[image] Getting cover picture instead');
+
+				// Getting cover picture instead
 
 				var url = 'http:'+$cover.attr('content').trim(),
-					filename = id+'_0.jpg';
+					filename = offer.id+'_0.jpg';
 
 				download(url, imagePath+filename, function() {
 					offer.images.push(filename);
@@ -341,39 +366,30 @@ var parseOffer = function($) {
 	})
 };
 
-var sendNotifications = function() {
+var sendNotifications = function(forced) {
 	if (!tokens.length)
-		return console.error('0 tokens, aborting...');
+		return console.error('[push] No devices registered');
 
 	if (notified === null)
 		notified = offers.length - 1;
 
-	console.log('slice', notified, offers.length);
-
 	var data = offers.slice(notified, offers.length);
 
 	if (!data.length)
-		return console.error('[messaging] 0 offers, aborting...');
-
-	//data.splice(0, 4);
-
-	console.log('[messaging] Sending '+data.length+' offers to '+tokens.length+' devices');
+		return console.error('[push] Nothing new to push');
 
 	data.forEach(function(offer) {
 		admin.messaging().sendToDevice(tokens, {
 			notification : {
-				body: offer.description.substr(0, 140)+(offer.description.length > 140 ? '...' : ''),
+				body: offer.price+'€, '+offer.address,
 				title: offer.title,
 				icon: offer.images.length ? 'img/leboncoin/'+offer.images[0] : 'img/logo.192.png',
-			},
-			data: {
-				price: offer.price+' €',
-				address: offer.address,
+				click_action: 'https://www.leboncoin.fr/1/'+offer.id+'.htm'
 			}
 		}).then(function(response) {
-			console.log('[messaging] SUCCESS', response);
+			console.log('[push] '+data.length+' push'+(data.length > 1 ? 's' : '')+' sent to '+tokens.length+' device'+(tokens.length > 1 ? 's' : ''));
 		}).catch(function(error) {
-			console.log('[messaging] ERROR', error);
+			console.log('[push] ERROR', error);
 		});
 	})
 

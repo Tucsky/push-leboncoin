@@ -4,3 +4,4 @@ jspm_packages/
 .env
 credentials.json
 tokens.json
+config.json

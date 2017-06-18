@@ -1,73 +1,5 @@
-$(document).ready(function() {
-	$('[data-action=subscribe]').on('click', subscribe);
-	$('[data-action=unsubscribe]').on('click', unsubscribe);
-
-	$('.row-masonry').masonry({
-		columnWidth: '.grid-sizer',
-		itemSelector: '.grid-item',
-		percentPosition: true
-	});
-
-	$(window).scroll(function() {
-		if ($(window).scrollTop() + $(window).height() == $(document).height()) {
-			get()
-		}
-	});    
-
-	if (navigator.geolocation)
-		navigator.geolocation.getCurrentPosition(function(coordinates) {
-			position = {
-				lat: coordinates.coords.latitude,
-				lng: coordinates.coords.longitude
-			};
-
-			$row.find('> .offer').each(function() {
-				var offer = $(this).data('offer');
-
-				if (!offer.latlng)
-					return;
-
-				var distance = getDistance(position, offer.latlng);
-
-				$(this).find('.offer-distance').text('('+(distance / 1000).toFixed(2)+'km)');
-			})
-		});
-	else
-		ohSnap('Geolocation is not supported by this browser', {color: 'red'});
-
-	checkSubscription();
-
-	get();
-}).ajaxComplete(function(e, xhr, settings) {
-	var response = xhr.responseJSON || {};
-
-	if (response.error)
-		ohSnap(response.error, {color: 'red'});
-	else {
-		switch (xhr.status) {
-			case 404:
-				ohSnap('The resource "'+settings.url+'" cannot be found', {color: 'red'});
-			break;
-		}
-	}
-
-	if (response.message)
-		ohSnap(response.message, {color: 'blue'});
-});
-
-firebase.initializeApp({
-	apiKey: "AIzaSyCRSoBL6dKwZ-jlp22oXagCRVIKFOQBsvs",
-	authDomain: "project-2792471436428079009.firebaseapp.com",
-	databaseURL: "https://project-2792471436428079009.firebaseio.com",
-	projectId: "project-2792471436428079009",
-	storageBucket: "project-2792471436428079009.appspot.com",
-	messagingSenderId: "855601272318"
-});
-
-var messaging = firebase.messaging();
-var token;
-var position;
-var $row = $('.row-masonry');
+var $row = $('.row-masonry'),
+	position, token;
 
 function register(newToken) {
 	$.ajax({
@@ -224,3 +156,60 @@ function get() {
 		$row.data('loading', false);
 	})
 }
+
+$(document).ready(function() {
+	$('[data-action=subscribe]').on('click', subscribe);
+	$('[data-action=unsubscribe]').on('click', unsubscribe);
+
+	$('.row-masonry').masonry({
+		columnWidth: '.grid-sizer',
+		itemSelector: '.grid-item',
+		percentPosition: true
+	});
+
+	$(window).scroll(function() {
+		if ($(window).scrollTop() + $(window).height() == $(document).height()) {
+			get()
+		}
+	});    
+
+	if (navigator.geolocation)
+		navigator.geolocation.getCurrentPosition(function(coordinates) {
+			position = {
+				lat: coordinates.coords.latitude,
+				lng: coordinates.coords.longitude
+			};
+
+			$row.find('> .offer').each(function() {
+				var offer = $(this).data('offer');
+
+				if (!offer.latlng)
+					return;
+
+				var distance = getDistance(position, offer.latlng);
+
+				$(this).find('.offer-distance').text('('+(distance / 1000).toFixed(2)+'km)');
+			})
+		});
+	else
+		ohSnap('Geolocation is not supported by this browser', {color: 'red'});
+
+	checkSubscription();
+
+	get();
+}).ajaxComplete(function(e, xhr, settings) {
+	var response = xhr.responseJSON || {};
+
+	if (response.error)
+		ohSnap(response.error, {color: 'red'});
+	else {
+		switch (xhr.status) {
+			case 404:
+				ohSnap('The resource "'+settings.url+'" cannot be found', {color: 'red'});
+			break;
+		}
+	}
+
+	if (response.message)
+		ohSnap(response.message, {color: 'blue'});
+});
