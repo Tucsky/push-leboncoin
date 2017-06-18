@@ -32,10 +32,13 @@ $ease-elastic-back: cubic-bezier(0.34,-0.61,0.7,1);
 $ease-in-back: cubic-bezier(0.600, -0.280, 0.735, 0.045);
 $ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
 
+$fa-font-path: 'vendor/font-awesome/fonts/';
+
 /* Merge with bootstrap
 */
 
 @import 'public/vendor/bootstrap/scss/bootstrap';
+@import 'public/vendor/font-awesome/scss/font-awesome';
 
 /* Actual styles
 */
@@ -127,15 +130,68 @@ h1 {
 		.card {
 			img {
 				width: 100%;
+				background-color: $brand-warning;
 			}
+
+			.card-text {
+				max-height: 20vh;
+				overflow: hidden;
+				position: relative;
+
+				&.card-text-overflow {
+					position: relative;
+
+					&:before {
+						content: '';
+						position: absolute;
+						bottom: 0;
+						width: 100%;
+						height: 33%;
+						background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .5));
+						pointer-events: none;
+					}
+
+					&.more {
+						max-height: initial;
+						&:before {
+							display: none;
+						}
+					}
+				}
+			}
+
 			.footer {
 				position: relative;
 				text-align: right;
 
-				small.text-muted {
+				small {
 					position: absolute;
 					bottom: 0;
 					left: 0;
+					opacity: .75;
+				}
+			}
+
+			&.card-inverse {
+				a.btn {
+					@include button-variant($btn-primary-color, darken($brand-primary, 10%), $btn-primary-border);
+				}
+
+				&:before {
+					@include button-variant($btn-danger-color, $brand-danger, $btn-danger-border);
+					content: 'NEW';
+					position: absolute;
+					right: 0;
+					top: 0;
+					transform: translate(15%, -15%) scale(1.1);
+					border-radius: 4px;
+					color: #fff;
+					box-shadow: -10px 10px 10px rgba(0, 0, 0, 0.15);
+					color: white;
+					padding: 10px 15px;
+					font-weight: 600;
+					letter-spacing: 1px;
+					cursor: default;
 				}
 			}
 		}

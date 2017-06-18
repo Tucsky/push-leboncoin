@@ -50,7 +50,7 @@ gulp.task('js', function() {
 		
 	])
 		.pipe(concat('app.min.js'))
-		.pipe(uglify().on('error', function(e) {
+		/*.pipe(uglify().on('error', function(e) {
 			console.error('Uglify error', e.cause ? {
 				message: e.cause.message,
 				filename: e.cause.filename,
@@ -58,12 +58,12 @@ gulp.task('js', function() {
 			} : 'unknown error');
 
 			return true;
-		}))
+		}))*/
 		.pipe(gulp.dest('./public/'))
 });
 
 gulp.task('watch', function() {
-	gulp.watch([bowerPath+'*.js'], ['js']).on('change', function(e) {
+	gulp.watch([bowerPath+'*.js', bowerPath+'../firebase-messaging-sw.js'], ['js']).on('change', function(e) {
 		console.log('File ' + e.path + ' was ' + e.type + ', running tasks...');
 	});
 	gulp.watch(sassPath+'**/*.scss', ['sass']).on('change', function(e) {

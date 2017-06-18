@@ -85,76 +85,100 @@ function get() {
 	if ($row.data('loading'))
 		return ohSnap('Please wait until the list is done loading !', {color: 'orange'});
 
-	$row.data('loading', true);
+	var id = null;
 
-	var page = $row.data('page', typeof $row.data('page') !== 'undefined' ? $row.data('page') + 1 : 0).data('page');
+	var $last = $row.find('> .offer:first');
+
+	if ($last.length) {
+		var offer = $last.data('offer');
+
+		id = offer.id;
+	}
+
+	$row.data('loading', true);
 
 	$.ajax({
 		url: 'offers',
 		type: 'POST',
 		data: {
-			page: page,
+			id: id,
 		}
 	}).done(function(response) {
 		if (!response.success)
 			return;
 
 		if (!response.offers || !response.offers.length) {
-			if (page == 0)
+			if (id === null)
 				return ohSnap('Nothing to display yet', {color: 'red'});
 			else {
-				$row.data('page', page - 1);
 				return ohSnap('You reached the end of the list', {color: 'red'});
 			}
 		}
 
+		response.offers.reverse();
 		response.offers.forEach(function(offer) {
-			var $offer = $('#'+offer.id),
-				exists = $offer.length;
-
-			$offer = exists ? $offer : $('<div/>', {id: offer.id, class: 'grid-item offer col-xs-12 col-sm-6 col-md-4'}).html('<div class="card">\
-				'+(offer.images.length ? '<img class="card-img-top" src="" alt="'+offer.title+'">' : '')+'\
-				<div class="card-block">\
-					<h4 class="card-title"></h4>\
-					<p class="card-text"></p>\
-					<div class="footer">\
-						<small class="text-muted">\
-							<span class="offer-ago"></span>\
-							<span class="offer-distance"></span>\
-						</small>\
-						<a href="#" target="_blank" class="btn btn-primary" title="Show offer">Show</a>\
-					</div>\
-				</div>\
-			</div>');
-
-			$offer.data('offer', offer);
-
-			var date = moment(offer.date);
-
-			$offer.find('.card-title').text(offer.title);
-			$offer.find('.card-text').html(offer.description);
-			$offer.find('.offer-ago').text(date.fromNow());
-			$offer.find('a')
-				.attr('href', 'https://www.leboncoin.fr/velos/'+offer.id+'.htm')
-				.text(offer.price+' €');
-
-			if (position && offer.latlng) {
-				var distance = getDistance(position, offer.latlng);
-				$offer.find('.offer-distance').text('('+(distance / 1000).toFixed(2)+'km)');
-			}
-
-			if (offer.images.length) {
-				$offer.find('.card-img-top').one('load', function() {
-					$row.masonry('appended', $offer);
-				}).attr('src', 'img/leboncoin/'+offer.images[0]).attr('alt', offer.title);
-			}
-
-			if (!exists)
-				$row.append($offer);
+			showOffer(offer);
 		})
 	}).always(function() {
 		$row.data('loading', false);
 	})
+}
+
+function showOffer(offer, top) {
+	var $offer = $('#'+offer.id),
+		exists = $offer.length;
+
+	$offer = exists ? $offer : $('<div/>', {id: offer.id, class: 'grid-item offer col-xs-12 col-sm-6 col-md-4'}).html('<div class="card'+(top ? ' card-inverse bg-primary' : '')+'">\
+		'+(offer.images.length ? '<img class="card-img-top" src="" alt="'+offer.title+'">' : '')+'\
+		<div class="card-block">\
+			<h4 class="card-title"></h4>\
+			<div class="card-text">\
+				<p></p>\
+			</div>\
+			<div class="footer">\
+				<small>\
+					<span class="offer-ago"></span>\
+					<span class="offer-distance"></span>\
+				</small>\
+				<a href="#" target="_blank" class="btn btn-primary" title="Show offer"><i class="fa fa-shopping-cart"></i> <span class="offer-price"></span></a>\
+			</div>\
+		</div>\
+	</div>');
+
+	$offer.data('offer', offer);
+
+	var date = moment(offer.date);
+
+	$offer.find('.card-title').text(offer.title);
+	$offer.find('.card-text p').html(offer.description);
+
+	$offer.find('.offer-ago').text(date.fromNow())
+	$offer.find('.offer-price').text(offer.price+' €');
+	$offer.find('a').attr('href', 'https://www.leboncoin.fr/velos/'+offer.id+'.htm');
+
+	if (position && offer.latlng) {
+		var distance = getDistance(position, offer.latlng);
+		$offer.find('.offer-distance').text('('+(distance / 1000).toFixed(2)+'km)');
+	}
+
+	if (offer.images.length) {
+		$offer.find('.card-img-top').one('load', function() {
+			if (!exists)
+				$row.masonry(top ? 'prepended' : 'appended', $offer);
+		}).attr('src', 'img/leboncoin/'+offer.images[0]).attr('alt', offer.title);
+	}
+
+	if (!exists) {
+		if (top)
+			$row.prepend($offer);
+		else
+			$row.append($offer);
+	}
+
+	if ($offer.find('.card-text p').height() > $offer.find('.card-text').height())
+		$offer.find('.card-text').addClass('card-text-overflow');
+	else
+		$offer.find('.card-text').removeClass('card-text-overflow');
 }
 
 $(document).ready(function() {
@@ -164,13 +188,32 @@ $(document).ready(function() {
 	$('.row-masonry').masonry({
 		columnWidth: '.grid-sizer',
 		itemSelector: '.grid-item',
-		percentPosition: true
+		percentPosition: true,
+	}).on('click', '.card .card-text-overflow', function() {
+		var $item = $(this).toggleClass('more').closest('.grid-item');
+
+		$row.masonry('layout');
+	});
+	
+	messaging.onMessage(function(payload) {
+		if (!payload || !payload.data || !payload.data.offer)
+			return ohSnap('Invalid payload object received', {color: 'red'});
+
+		try{ 
+			var offer = JSON.parse(payload.data.offer)
+		} catch(e) { 
+			var offer = null;
+
+			ohSnap("Invalid offer received\n"+e.message, {color: 'red'});
+		}
+
+		if (offer)
+			showOffer(offer, true);
 	});
 
 	$(window).scroll(function() {
-		if ($(window).scrollTop() + $(window).height() == $(document).height()) {
-			get()
-		}
+		if ($(window).scrollTop() + $(window).height() == $(document).height())
+			get();
 	});    
 
 	if (navigator.geolocation)

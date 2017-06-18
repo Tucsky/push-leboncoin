@@ -12,7 +12,7 @@ var windows1252 = require('windows-1252');
 
 if (!fs.existsSync('config.json'))
 	fs.writeFileSync('config.json', JSON.stringify({
-		"filters": "https://www.leboncoin.fr/velos/offres/ile_de_france/?th=1&w=4&latitude=48.868630&longitude=2.201012&radius=10000&ps=5&pe=12",
+		"url": "https://www.leboncoin.fr/velos/offres/ile_de_france/?th=1&w=4&latitude=48.868630&longitude=2.201012&radius=10000&ps=5&pe=12",
 		"port": 1337,
 		"whitelist": [],
 		"blacklist": [],
@@ -124,9 +124,30 @@ app.post('/unsubscribe', function (req, res) {
 });
 
 app.post('/offers', function (req, res) {
-	var page = req.body.page || 0,
-		offset = page * 15;
-		items = offers.slice(offset, offset + 15);
+	if (!offers.length)
+		return res.json({success: false, error: "Nothing to show"});
+
+	var id = req.body.id;
+
+	if (!id) {
+		var items = offers.slice(offers.length - 15, offers.length);
+		console.log(offers.length - 15, offers.length, items);
+	}
+	else {
+		var index = null;
+
+		for (var i=0; i<offers.length; i++) {
+			if (id == offers[i].id) {
+				index = i;
+				break;
+			}
+		}
+
+		if (index === null)
+			return res.json({success: false, error: "The provided id doesn't match with any active offers"});
+
+		var items = offers.slice(index - 15, index);
+	}
 		
 	return res.json({success: true, offers: items});
 })
@@ -149,18 +170,34 @@ process.stdin.resume();
 process.stdin.setEncoding('utf8');
 
 process.stdin.on('data', function(text) {
-	switch (text.trim()) {
-		case 'send':
-			send();
+	var path = text.trim().split(' ');
+
+	if (!path || !path.length)
+		return console.log("Invalid command\n");
+
+	var fn = path.splice(0, 1).toString();
+
+	switch (fn) {
+		case 'push':
+			var n = parseInt(path[0]) || 0;
+
+			sendNotifications(n);
 		break;
-		case 'scrape':
+		case 'get':
 			getOffers();
+		break;
+		case 'list':
+			list(offers);
 		break;
 	}
 });
 
 /* App related function
 */
+
+var random_str = function() {
+	return Math.random().toString(36).substring();
+}
 
 var save = function() {
 	fs.writeFile('tokens.json', JSON.stringify(tokens), 'utf8', function() {
@@ -194,35 +231,28 @@ var scrape = function(uri, callback, headers) {
 		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
 	}, headers || {})
 
-	request({
-		url: uri,
-		headers: headers,
-		encoding: null,
-	}, function(err, res, body) { 
-		if (err) {
-			console.error('[scraper] Request "'+uri+'" failed miserably');
-			return callback(false); 
-		}
+	setTimeout(function() {
+		request({
+			url: uri,
+			headers: headers,
+			encoding: null,
+		}, function(err, res, body) { 
+			if (err) {
+				console.error('[scraper] Request "'+uri+'" failed miserably');
+				return callback(false); 
+			}
 
-		body = windows1252.decode(body.toString('binary'));
+			body = windows1252.decode(body.toString('binary'));
 
-		callback(body); 
-	});
+			callback(body); 
+		});
+	}, Math.random() * 500);
 };
 
 var getOffers = function(callback) {
 	var url = config.url;
 
 	console.log('[scraper] Initiate request GET');
-	var count = 0;
-
-	var done = function(callback) {
-		var added = offers.length - beforeCount;
-		console.log('[scraper] '+added+' offer'+(added > 1 ? 's' : '')+' added');
-
-		if (typeof callback === 'function')
-			callback(offers, added);
-	}
 
 	scrape(url, function(body) {
 		if (body === false)
@@ -259,16 +289,11 @@ var getOffers = function(callback) {
 			offers_ids.push(offer.id);
 
 			parseOffer.apply(this, [offer]);
-
-			count++;
 		});
 	})
 
 	// 10 sec delay before sending the notifications to be sure that the images are up and everythings alright
 	setTimeout(sendNotifications, config.countdown);
-
-	// Delay in ms before getting new results
-	setTimeout(getOffers, config.interval);
 
 };
 
@@ -288,11 +313,27 @@ var parseOffer = function(offer) {
 		};
 
 		var elements = {
+			title: $('title'),
 			address: $('.line_city .value'),
 			title: $('h1'),
 			description: $('.properties_description .value'),
 			price: $('.item_price'),
 			script1: $('#adview aside.sidebar script'),
+		}
+
+		if (elements.title.length) {
+			var title = elements.title.text().trim();
+
+			switch (title) {
+				case '':
+				case 'Annonce introuvable':
+				case 'Cette annonce est désactivée':
+					console.error('[scraper] Invalid body #'+offer.id+' ('+title+') retry in 1s...');
+					return setTimeout(function() {
+						parseOffer(offer);
+					}, 1000);
+				break;
+			}
 		}
 
 		var valid = true;
@@ -303,8 +344,10 @@ var parseOffer = function(offer) {
 			}
 		});
 
-		if (!valid)
-			return console.error('[scraper] Skipping offer #'+offer.id+' (missing element(s))');
+		if (!valid) {
+			console.error('[scraper] Skipping offer #'+offer.id+' (missing element(s))');
+			return;
+		}
 
 		offer.address = elements.address.text().trim();
 		offer.title = elements.title.text().trim();
@@ -328,6 +371,7 @@ var parseOffer = function(offer) {
 				return console.info('[scraper] Exclude offer #'+offer.id+' (blacklisted'+(matchBlacklist.length ? ' through "'+matchBlacklist[0]+'"' : '')+'))');
 		}
 
+		console.log('[scraper] Append offer #'+offer.id);
 		offer = offers[offers.push(offer) - 1];
 
 		var latlng = {};
@@ -390,34 +434,78 @@ var parseOffer = function(offer) {
 	})
 };
 
-var sendNotifications = function(forced) {
+var sendNotifications = function(n) {
+	offers.sort(function(a, b) { 
+	    return a.date.diff(b.date);
+	});
+
 	if (!tokens.length)
 		return console.error('[push] No devices registered');
 
-	if (notified === null)
-		notified = offers.length - 1;
+	list(offers, 16);
 
-	var data = offers.slice(notified, offers.length);
+	if (n && n > 0) {
+		console.log('[debug] Slice', offers.length - n, offers.length);
+		var data = offers.slice(offers.length - n, offers.length);
 
-	if (!data.length)
-		return console.error('[push] Nothing new to push');
+		if (!data.length)
+			return console.error('[push] Nothing to push ('+(offers.length - 1 - n)+' - '+offers.length+')');
+	} else {
+		if (notified === null)
+			notified = offers.length - 1;
 
-	data.forEach(function(offer) {
+		console.log('[debug] Slice', notified, offers.length);
+		var data = offers.slice(notified, offers.length);
+
+		if (!data.length)
+			return console.error('[push] Nothing new to push');
+
+		notified += data.length;
+	}
+
+	list(data, null, "About to send "+data.length+" offers");
+
+	var sent = 0;
+
+	data.forEach(function(offer, index) {
 		admin.messaging().sendToDevice(tokens, {
 			notification : {
 				body: offer.price+'€, '+offer.address,
 				title: offer.title,
 				icon: offer.images.length ? 'img/leboncoin/'+offer.images[0] : 'img/logo.192.png',
 				click_action: 'https://www.leboncoin.fr/1/'+offer.id+'.htm'
-			}
+			},
+			data: {
+				offer: JSON.stringify(offer)
+			},
 		}).then(function(response) {
-			console.log('[push] '+data.length+' push'+(data.length > 1 ? 's' : '')+' sent to '+tokens.length+' device'+(tokens.length > 1 ? 's' : ''));
+			sent++;
+
+			if (index == data.length - 1)
+				console.log('[push] '+sent+' push'+(sent > 1 ? 's' : '')+' sent to '+tokens.length+' device'+(tokens.length > 1 ? 's' : ''));
 		}).catch(function(error) {
 			console.log('[push] ERROR', error);
 		});
 	})
+}
 
-	notified += data.length;
+var list = function(data, n, title) {
+	if (!data)
+		return;
+
+	var n = parseInt(n);
+
+	if (!title)
+		title = n ? "last "+Math.min(n, data.length)+" offers (out of "+data.length+")" : data.length+" offers";
+
+	console.log("\n[list] "+title+" :");
+	data.slice(n ? Math.max(0, data.length - n) : 0, data.length).forEach(function(offer) {
+		console.log("\t["+offer.id+"] "+offer.title+" ("+offer.price+", "+offer.date.format('YYYY-MM-DD HH:mm:ss')+")");
+	});
+	console.log("\n");
 }
 
 getOffers();
+
+// Delay in ms before getting new results
+setInterval(getOffers, config.interval);

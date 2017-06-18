@@ -17,6 +17,8 @@ firebase.initializeApp(config);
 
 var messaging = firebase.messaging();
 
+if (typeof importScripts === 'function') {
 	messaging.setBackgroundMessageHandler(function(payload) {
 		return self.registration.showNotification('title', {body: 'body'});
 	});
+}

@@ -1,6 +1,6 @@
 {
   "name": "push-leboncoin",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "NodeJS app that scrap leboncoin.fr every minutes with the latest offers then send push notifications",
   "main": "server.js",
   "scripts": {
