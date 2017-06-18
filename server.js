@@ -287,37 +287,61 @@ var parseOffer = function(offer) {
 			lng: null,
 		};
 
-		offer.address = $('.line_city .value').text().trim();
-		offer.title = $('h1').text().trim();
-		offer.description = $('.properties_description .value').html().trim();
-		offer.price = $('.item_price').attr('content');
+		var elements = {
+			address: $('.line_city .value'),
+			title: $('h1'),
+			description: $('.properties_description .value'),
+			price: $('.item_price'),
+			script1: $('#adview aside.sidebar script'),
+		}
 
-		if (config.whitelist.length && !new RegExp(config.whitelist.join('|')).test((offer.title+' '+offer.description).toLowerCase()))
-			return console.info('[scraper] Exclude offer #'+offer.id+' (not whitelisted)');
+		var valid = true;
+		Object.keys(elements).forEach(function(key) {
+			if (!elements[key].length) {
+				console.error('[scraper] Element "'+key+'" not found in offer #'+offer.id);
+				valid = false;
+			}
+		});
 
-		if (config.blacklist.length && new RegExp(config.blacklist.join('|')).test((offer.title+' '+offer.description).toLowerCase()))
-			return console.info('[scraper] Exclude offer #'+offer.id+' (blacklisted)');
+		if (!valid)
+			return console.error('[scraper] Skipping offer #'+offer.id+' (missing element(s))');
+
+		offer.address = elements.address.text().trim();
+		offer.title = elements.title.text().trim();
+		offer.description = elements.description.html().trim();
+		offer.price = elements.price.attr('content');
+
+		var matchWhitelist,
+			matchBlacklist;
+
+		if (config.whitelist.length) {
+			matchWhitelist = (offer.title+' '+offer.description).toLowerCase().match(new RegExp(config.whitelist.join('|')));
+
+			if (!matchWhitelist)
+				return console.info('[scraper] Exclude offer #'+offer.id+' (not whitelisted)');
+		}
+
+		if (config.blacklist.length) {
+			matchBlacklist = (offer.title+' '+offer.description).toLowerCase().match(new RegExp(config.blacklist.join('|')));
+
+			if (matchBlacklist)
+				return console.info('[scraper] Exclude offer #'+offer.id+' (blacklisted'+(matchBlacklist.length ? ' through "'+matchBlacklist[0]+'"' : '')+'))');
+		}
 
 		offer = offers[offers.push(offer) - 1];
 
-		var $script = $('#adview aside.sidebar script'),
-			latlng = {};
+		var latlng = {};
 
-		if ($script.length) {
-			['lat', 'lng'].forEach(function(key) {
-				var match = $script.html().trim().match(new RegExp(key+' = \"(.*)\";'));
+		['lat', 'lng'].forEach(function(key) {
+			var match = elements.script1.html().trim().match(new RegExp(key+' = \"(.*)\";'));
 
-				if (match && match[1] && match[1].length > 2 && match[1].length < 32) {
-					value = match[1].trim();
-					latlng[key] = value;
-				} else {
-					return console.error('[parser/latlng] No '+key+' found');
-				}
-			});
-		} else {
-			console.log('[scraper] Missing script (critical)');
-			console.log($.html());
-		}
+			if (match && match[1] && match[1].length > 2 && match[1].length < 32) {
+				value = match[1].trim();
+				latlng[key] = value;
+			} else {
+				return console.error('[parser/latlng] No '+key+' found');
+			}
+		});
 
 		if (latlng.lat && latlng.lng)
 			offer.latlng = latlng;
@@ -325,7 +349,7 @@ var parseOffer = function(offer) {
 		var imagePath = __dirname+'/public/img/leboncoin/';
 
 		if ($('.item_photo').length) {
-			var $script = $('.item_photo').next();
+			var $script = $('.item_photo').next('script');
 
 			if ($script.length) {
 				for (var i=0; i<10; i++) {
