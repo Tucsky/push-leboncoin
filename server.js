@@ -11,7 +11,7 @@ var windows1252 = require('windows-1252');
 */
 
 if (!fs.existsSync('config.json'))
-	fs.writeFileSync('tokens.json', JSON.stringify({
+	fs.writeFileSync('config.json', JSON.stringify({
 		"filters": "https://www.leboncoin.fr/velos/offres/ile_de_france/?th=1&w=4&latitude=48.868630&longitude=2.201012&radius=10000&ps=5&pe=12",
 		"port": 1337,
 		"whitelist": [],
