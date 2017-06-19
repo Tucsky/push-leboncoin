@@ -83,12 +83,12 @@ app.post('/register', function (req, res) {
 	var token = req.body.token;
 
 	if (!token) {
-		console.error('[/register] Invalid token');
+		console.error('[tokens] Invalid token');
 		return res.json({success: false, error: "Invalid token"});
 	}
 
 	if (tokens.indexOf(token) > -1) {
-		console.error('[/register] Already registered');
+		console.error('[tokens] Already registered');
 		return res.json({success: true, message: "Already registered"});
 	}
 
@@ -96,7 +96,7 @@ app.post('/register', function (req, res) {
 
 	save();
 
-	console.info('[/register] Registered');
+	console.info('[tokens] Registered');
 	return res.json({success: true, message: "Registered"});
 });
 
@@ -104,14 +104,14 @@ app.post('/unsubscribe', function (req, res) {
 	var token = req.body.token;
 
 	if (!token) {
-		console.error('[/unsubscribe] Invalid token');
+		console.error('[tokens] Invalid token');
 		return res.json({success: false, error: "Invalid token"});
 	}
 
 	var index = tokens.indexOf(token);
 
 	if (index === -1) {
-		console.error('[/unsubscribe] Not registered');
+		console.error('[tokens] Not registered');
 		return res.json({success: true, message: "Not registered"});
 	}
 
@@ -119,7 +119,7 @@ app.post('/unsubscribe', function (req, res) {
 
 	save();
 
-	console.info('[/unsubscribe] Unsubscribed');
+	console.info('[tokens] Unsubscribed');
 	return res.json({success: true, message: "Unsubscribed"});
 });
 
@@ -130,15 +130,18 @@ app.post('/offers', function (req, res) {
 	var id = req.body.id;
 
 	if (!id) {
+		console.log('[debug] Slice', offers.length - 15, offers.length);
 		var items = offers.slice(offers.length - 15, offers.length);
-		console.log(offers.length - 15, offers.length, items);
 	}
 	else {
 		var index = null;
 
+		console.log('[debug] Looking for id "'+id+'"');
 		for (var i=0; i<offers.length; i++) {
+			console.log('[debug] Offer id comparison', id == offers[i].id ? 'found' : 'nope');
 			if (id == offers[i].id) {
 				index = i;
+				console.log('[debug] Index is', i, offers[i].id, offers[i].title);
 				break;
 			}
 		}
@@ -146,7 +149,8 @@ app.post('/offers', function (req, res) {
 		if (index === null)
 			return res.json({success: false, error: "The provided id doesn't match with any active offers"});
 
-		var items = offers.slice(index - 15, index);
+		console.log('[debug] Slice', Math.max(0, index - 15), index);
+		var items = offers.slice(Math.max(0, index - 15), index);
 	}
 		
 	return res.json({success: true, offers: items});
@@ -189,6 +193,10 @@ process.stdin.on('data', function(text) {
 		case 'list':
 			list(offers);
 		break;
+		case 'flush':
+			console.log('[tokens] Flush tokens');
+			save([]);
+		break;
 	}
 });
 
@@ -199,9 +207,15 @@ var random_str = function() {
 	return Math.random().toString(36).substring();
 }
 
-var save = function() {
+var save = function(newTokens) {
+	if (typeof newTokens !== 'undefined')
+		if (typeof newTokens === 'string' && tokens.indexOf(newTokens) === -1)
+			tokens.push(newTokens);
+		else
+			tokens = newTokens;
+
 	fs.writeFile('tokens.json', JSON.stringify(tokens), 'utf8', function() {
-		console.log('[tokens] '+tokens.length+' token(s) saved');
+		console.log('[tokens] '+tokens.length+' token'+(tokens.length > 1 ? 's' : '')+' in memory');
 	});
 }
 
@@ -465,24 +479,35 @@ var sendNotifications = function(n) {
 
 	list(data, null, "About to send "+data.length+" offers");
 
-	var sent = 0;
-
-	data.forEach(function(offer, index) {
+	data.forEach(function(offer, indexMessage) {
 		admin.messaging().sendToDevice(tokens, {
-			notification : {
-				body: offer.price+'€, '+offer.address,
-				title: offer.title,
-				icon: offer.images.length ? 'img/leboncoin/'+offer.images[0] : 'img/logo.192.png',
-				click_action: 'https://www.leboncoin.fr/1/'+offer.id+'.htm'
-			},
 			data: {
 				offer: JSON.stringify(offer)
 			},
 		}).then(function(response) {
-			sent++;
+			var devices = 0;
 
-			if (index == data.length - 1)
-				console.log('[push] '+sent+' push'+(sent > 1 ? 's' : '')+' sent to '+tokens.length+' device'+(tokens.length > 1 ? 's' : ''));
+			response.results.forEach(function(result, indexDevice) {
+				if (result.error) {
+					var code = result.error.errorInfo.code;
+
+					console.error("[push] ERROR while sending push "+(indexMessage + 1)+"/"+data.length+" to device "+(indexDevice + 1)+"/"+tokens.length+"\n", "\t => \""+code+"\"\n");
+
+					switch (code) {
+						case 'messaging/registration-token-not-registered':
+							console.log('[tokens] Unsubscribing token');
+							tokens.splice(indexDevice, 1);
+							save();
+						break;
+					}
+
+					return;
+				}
+				
+				devices++;
+			});
+
+			console.log('[push] 1 push (offer #'+offer.title+') sent to '+devices+' device'+(devices > 1 ? 's' : ''));
 		}).catch(function(error) {
 			console.log('[push] ERROR', error);
 		});

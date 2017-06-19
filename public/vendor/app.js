@@ -1,5 +1,5 @@
 var $row = $('.row-masonry'),
-	position, token;
+	position, token, worker;
 
 function register(newToken) {
 	$.ajax({
@@ -87,7 +87,7 @@ function get() {
 
 	var id = null;
 
-	var $last = $row.find('> .offer:first');
+	var $last = $row.find('> .offer:last');
 
 	if ($last.length) {
 		var offer = $last.data('offer');
@@ -181,7 +181,66 @@ function showOffer(offer, top) {
 		$offer.find('.card-text').removeClass('card-text-overflow');
 }
 
-$(document).ready(function() {
+navigator.serviceWorker.register('./worker.js')
+	.then(function(registration) {
+		isWorkerReady(registration);
+	}).catch(function(err) {
+		console.error(err);
+	})
+
+var isWorkerReady = function(registration) {
+	if (!registration || !registration.active) {
+		console.error('Worker is not ready yet, try again in 1s...');
+		return setTimeout(function() {
+			isWorkerReady(registration)
+		}, 1000);
+	}
+
+	worker = registration.active;
+
+	ohSnap('Worker connected', {color: 'green'});
+	console.log('Worker is up and running !', worker);
+
+	worker.onstatechange = function(e) {
+		console.log('Worker state changed', e);
+	}
+
+	worker.onerror = function(e) {
+		console.error('Worker error', e);
+	}
+
+	messaging.useServiceWorker(registration);
+
+	init();
+}
+
+var init = function() {
+
+	/* Register DOM events
+	*/ 
+
+	$(window).scroll(function() {
+		if ($(window).scrollTop() + $(window).height() == $(document).height())
+			get();
+	}); 
+
+	$(document).ajaxComplete(function(e, xhr, settings) {
+		var response = xhr.responseJSON || {};
+
+		if (response.error)
+			ohSnap(response.error, {color: 'red'});
+		else {
+			switch (xhr.status) {
+				case 404:
+					ohSnap('The resource "'+settings.url+'" cannot be found', {color: 'red'});
+				break;
+			}
+		}
+
+		if (response.message)
+			ohSnap(response.message, {color: 'blue'});
+	});
+	
 	$('[data-action=subscribe]').on('click', subscribe);
 	$('[data-action=unsubscribe]').on('click', unsubscribe);
 
@@ -194,7 +253,14 @@ $(document).ready(function() {
 
 		$row.masonry('layout');
 	});
-	
+
+	/* Bootstrap worker
+	*/ 
+
+	worker.onmessage = function() {
+		console.log('received message');
+	};
+
 	messaging.onMessage(function(payload) {
 		if (!payload || !payload.data || !payload.data.offer)
 			return ohSnap('Invalid payload object received', {color: 'red'});
@@ -209,12 +275,7 @@ $(document).ready(function() {
 
 		if (offer)
 			showOffer(offer, true);
-	});
-
-	$(window).scroll(function() {
-		if ($(window).scrollTop() + $(window).height() == $(document).height())
-			get();
-	});    
+	});   
 
 	if (navigator.geolocation)
 		navigator.geolocation.getCurrentPosition(function(coordinates) {
@@ -222,6 +283,8 @@ $(document).ready(function() {
 				lat: coordinates.coords.latitude,
 				lng: coordinates.coords.longitude
 			};
+
+			worker.postMessage({name: 'position', position: position});
 
 			$row.find('> .offer').each(function() {
 				var offer = $(this).data('offer');
@@ -237,22 +300,14 @@ $(document).ready(function() {
 	else
 		ohSnap('Geolocation is not supported by this browser', {color: 'red'});
 
+	/* Get device token
+	*/
+
 	checkSubscription();
 
+	/* Get first page of offers
+	*/
+
 	get();
-}).ajaxComplete(function(e, xhr, settings) {
-	var response = xhr.responseJSON || {};
 
-	if (response.error)
-		ohSnap(response.error, {color: 'red'});
-	else {
-		switch (xhr.status) {
-			case 404:
-				ohSnap('The resource "'+settings.url+'" cannot be found', {color: 'red'});
-			break;
-		}
-	}
-
-	if (response.message)
-		ohSnap(response.message, {color: 'blue'});
-});
+}

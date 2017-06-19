@@ -11,8 +11,8 @@ It just monitor ONE url for now, the default config aim to scrap Paris bike rela
 ## Requirements
 Vous aurez besoin d'un [Projet Firebase](https://console.firebase.google.com/u/0/)<br>
 Firebase fournit 2 fichiers conf, à intégrer au projet comme ceci :<br>
+- [public/worker.js](public/worker.js) pour les *clés publiques* (Firebase > Mon projet > Ajouter Firebase à votre application Web)
 - [credientials.json](credientials.json) pour les *clés secretes* (Firebase > Mon projet > Paramètres du projet > [Onglet "Comptes & Services"](https://console.firebase.google.com/u/0/project/le_nom_de_ton_projet_ici/settings/serviceaccounts/adminsdk))
-- [public/firebase-messaging-sw.js](public/firebase-messaging-sw.js) pour les *clés publiques* (Firebase > Mon projet > Ajouter Firebase à votre application Web)
 
 ## Usage
 ```js

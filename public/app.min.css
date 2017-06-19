@@ -9630,9 +9630,9 @@ h1 {
   position: absolute;
   right: 0;
   top: 0;
-  -webkit-transform: translate(15%, -15%) scale(1.1);
-      -ms-transform: translate(15%, -15%) scale(1.1);
-          transform: translate(15%, -15%) scale(1.1);
+  -webkit-transform: translate(15%, -15%) scale(1);
+      -ms-transform: translate(15%, -15%) scale(1);
+          transform: translate(15%, -15%) scale(1);
   border-radius: 4px;
   color: #fff;
   -webkit-box-shadow: -10px 10px 10px rgba(0, 0, 0, 0.15);

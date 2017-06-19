@@ -45,7 +45,7 @@ gulp.task('js', function() {
 		bowerPath+'firebase/firebase.js',
 
 		// App
-		bowerPath+'../firebase-messaging-sw.js',
+		bowerPath+'../worker.js',
 		bowerPath+'app.js',
 		
 	])
@@ -63,7 +63,7 @@ gulp.task('js', function() {
 });
 
 gulp.task('watch', function() {
-	gulp.watch([bowerPath+'*.js', bowerPath+'../firebase-messaging-sw.js'], ['js']).on('change', function(e) {
+	gulp.watch([bowerPath+'*.js', bowerPath+'../worker.js'], ['js']).on('change', function(e) {
 		console.log('File ' + e.path + ' was ' + e.type + ', running tasks...');
 	});
 	gulp.watch(sassPath+'**/*.scss', ['sass']).on('change', function(e) {
