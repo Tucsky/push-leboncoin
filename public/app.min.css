@@ -9582,10 +9582,10 @@ h1 {
       bottom: 0;
       width: 100%;
       height: 33%;
-      background: -webkit-gradient(linear, left top, left bottom, from(rgba(255, 255, 255, 0)), to(rgba(255, 255, 255, 0.5)));
-      background: -webkit-linear-gradient(top, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5));
-      background: -o-linear-gradient(top, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5));
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5));
+      background: -webkit-gradient(linear, left top, left bottom, from(rgba(255, 255, 255, 0)), to(white));
+      background: -webkit-linear-gradient(top, rgba(255, 255, 255, 0), white);
+      background: -o-linear-gradient(top, rgba(255, 255, 255, 0), white);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0), white);
       pointer-events: none; }
     .row-masonry .offer .card .card-text.card-text-overflow.more {
       max-height: initial; }
@@ -9658,3 +9658,9 @@ h1 {
     background-color: #c9302c;
     background-image: none;
     border-color: #c12e2a; }
+
+.row-masonry .offer .card.card-inverse .card-text-overflow:before {
+  background: -webkit-gradient(linear, left top, left bottom, from(rgba(2, 117, 216, 0)), to(#0275d8));
+  background: -webkit-linear-gradient(top, rgba(2, 117, 216, 0), #0275d8);
+  background: -o-linear-gradient(top, rgba(2, 117, 216, 0), #0275d8);
+  background: linear-gradient(180deg, rgba(2, 117, 216, 0), #0275d8); }

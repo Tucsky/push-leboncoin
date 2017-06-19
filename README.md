@@ -1,7 +1,7 @@
 # push-leboncoin
-Basicaly this is a implemtation of the Firebase cloud messaging quickstart for NodeJS<bt>
+This is a implementation of the Firebase Cloud Messaging quickstart for NodeJS<bt>
 The app itself scrap leboncoin.fr every minutes with the latest offers then send push notifications<br>
-It just monitor ONE url for now, the default config aim to scrap Paris bike related offers (see #[configuration](#user-content-configuration))<br>
+It just monitor ONE url at the moment, the default config aims to scrap the latest Paris bike related offers (see #[configuration](#user-content-configuration))<br>
 
 - **Scrap le contenu d'un feed leboncoin**
 - **Formate les données, filtre par mot-clé(s)** (nom / description d'annonce)
@@ -19,7 +19,7 @@ Firebase fournit 2 fichiers conf, à intégrer au projet comme ceci :<br>
 npm install --only=production
 node server.js
 ```
-Au démarrage le serveur récupère la première page d'annonce et envois une push de test, ensuite l'app va scrape la liste toutes les 5 minutes (paramétrable) en envoyant un push à tous les appareils enregistrés et ce pour toutes les nouvelles qui sont conforme au filtres (blacklist/whitelist)<br><br>
+Au démarrage le serveur récupère la première page d'annonce et envois une push de test, ensuite l'app va scrape la liste toutes les 5 minutes (paramétrable) en envoyant un push à tous les appareils enregistrés et ce pour toutes les nouvelles qui sont conforme au filtres (blacklist/whitelist)<br>
 
 ### Enregistrement des appareils
 Pour recevoir les push un appareil doit autoriser les notifications depuis sont navigateur (chrome/firefox/android) lors de l'autorisation le serveur garde le token généré en mémoire et s'en servira pour envoyer les notifs.
@@ -35,7 +35,7 @@ Les configurations se situent dans [config.js](config.js)
 | whitelist | Mot clés obligatoires dans la fiche de l'annonce (optionnel) |
 | blacklist | Mot clés interdits dans la fiche de l'annonce (optionnel) |
 | interval | Intervale de récupération des dernieres annonces (en ms) |
-| countdown | Delais d'envois des notifications push (en ms, après récupération des annonces) |
+| countdown | Delais d'envois des notifications push après récupération des dernières annonces (en ms) |
 
 Le fichier de conf se créé **automatiquement** au premier démarrage et prend les valeurs par défaut suivantes
 ```json
