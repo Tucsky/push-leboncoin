@@ -484,6 +484,8 @@ var sendNotifications = function(n) {
 			data: {
 				offer: JSON.stringify(offer)
 			},
+		}, {
+			timeToLive: 60 * 60 * 24,
 		}).then(function(response) {
 			var devices = 0;
 
@@ -491,7 +493,7 @@ var sendNotifications = function(n) {
 				if (result.error) {
 					var code = result.error.errorInfo.code;
 
-					console.error("[push] ERROR while sending push "+(indexMessage + 1)+"/"+data.length+" to device "+(indexDevice + 1)+"/"+tokens.length+"\n", "\t => \""+code+"\"\n");
+					console.error("\n[push] ERROR while sending push "+(indexMessage + 1)+"/"+data.length+" to device "+(indexDevice + 1)+"/"+tokens.length+"\n", "\t => \""+code+"\"\n");
 
 					switch (code) {
 						case 'messaging/registration-token-not-registered':

@@ -2,6 +2,9 @@ var $row = $('.row-masonry'),
 	position, token, worker;
 
 function register(newToken) {
+	if (!newToken)
+		return console.error('Device not ready to receive push notifications yet, please click the "Subscribe" button.');
+
 	$.ajax({
 		url: 'register',
 		type: 'POST',

@@ -49,6 +49,37 @@ if (typeof importScripts === 'function') {
 		};
 	};
 
+	self.onnotificationclick = function(e) {
+		var notification = e.notification;
+
+		if (!notification)
+			return console.error('Notification property is missing the event object');
+
+		switch (e.action) {
+			default:
+				if (!notification.data || !notification.data.url)
+					break;
+
+				var url = notification.data.url;
+
+				e.waitUntil(clients.matchAll({
+					type: "window"
+				}).then(function(clientList) {
+					for (var i = 0; i < clientList.length; i++) {
+						var client = clientList[i];
+						if (client.url == url && 'focus' in client)
+							return client.focus();
+					}
+
+					if (clients.openWindow)
+						return clients.openWindow(url);
+				}));
+			break;
+		}
+
+		notification.close();
+	}
+
 	messaging.setBackgroundMessageHandler(function(payload) {
 		var offer, distance = null;
 
@@ -66,10 +97,19 @@ if (typeof importScripts === 'function') {
 			distance = getDistance(self.position, offer.latlng);
 
 		return self.registration.showNotification(offer.title, {
+			tag: 'offer-'+offer.id,
 			body: offer.price+'€, '+offer.address+(distance !== null ? ' ('+(distance / 1000).toFixed(2)+'km)' : ''),
 			icon: offer.images.length ? 'img/leboncoin/'+offer.images[0] : 'img/logo.192.png',
 			image: offer.images.length ? 'img/leboncoin/'+offer.images[0] : 'img/logo.192.png',
-			click_action: 'https://www.leboncoin.fr/1/'+offer.id+'.htm'
+			vibrate: [200, 100, 200, 100, 200, 100, 200],
+			actions: [{
+				action: 'go',
+				title: "Consulter l'annonce",
+				icon: 'img/logo.192.png'
+			}],
+			data: {
+				url: 'https://www.leboncoin.fr/category/'+offer.id+'.htm'
+			}
 		});
 	});
 }
