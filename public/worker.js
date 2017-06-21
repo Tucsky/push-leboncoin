@@ -101,7 +101,7 @@ if (typeof importScripts === 'function') {
 			body: offer.price+'€, '+offer.address+(distance !== null ? ' ('+(distance / 1000).toFixed(2)+'km)' : ''),
 			icon: offer.images.length ? 'img/leboncoin/'+offer.images[0] : 'img/logo.192.png',
 			image: offer.images.length ? 'img/leboncoin/'+offer.images[0] : 'img/logo.192.png',
-			vibrate: [200, 100, 200, 100, 200, 100, 200],
+			vibrate: [20, 10, 750],
 			actions: [{
 				action: 'go',
 				title: "Consulter l'annonce",

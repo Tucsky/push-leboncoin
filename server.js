@@ -18,6 +18,7 @@ if (!fs.existsSync('config.json'))
 		"blacklist": [],
 		"interval": 1000*60*3,
 		"countdown": 1000*10,
+		"timetolive": 60*60*3,
 	}), {flag: 'wx'});
 
 if (!fs.existsSync('tokens.json'))
@@ -485,7 +486,7 @@ var sendNotifications = function(n) {
 				offer: JSON.stringify(offer)
 			},
 		}, {
-			timeToLive: 60 * 60 * 24,
+			timeToLive: config.timetolive || 60 * 60 * 3,
 		}).then(function(response) {
 			var devices = 0;
 

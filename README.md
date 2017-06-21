@@ -36,6 +36,7 @@ Les configurations se situent dans [config.js](config.js)
 | blacklist | Mot clés interdits dans la fiche de l'annonce (optionnel) |
 | interval | Intervale de récupération des dernieres annonces (en ms) |
 | countdown | Delais d'envois des notifications push après récupération des dernières annonces (en ms) |
+| timetolive | Passé ce nombre de seconde la notification ne pourra plus être envoyée (appareil en veille / hors ligne) |
 
 Le fichier de conf se créé **automatiquement** au premier démarrage et prend les valeurs par défaut suivantes
 ```json
@@ -45,7 +46,8 @@ Le fichier de conf se créé **automatiquement** au premier démarrage et prend 
 	"whitelist": [],
 	"blacklist": [],
 	"countdown": 10000,
-	"interval": 180000
+	"interval": 180000,
+	"timetolive": 10800,
 }
 ```
 
