@@ -258,8 +258,6 @@ var download = function(uri, path, callback){
 };
 
 var getOffers = function() {
-	console.log('[scraper] Initiate request GET');
-
 	return new leboncoin.Search().run(null, config.query).then(data => {
 		if (!data.results) {
 			console.log('[scraper] No results');
@@ -293,6 +291,10 @@ var getOffers = function() {
 
 				if (offer.images && offer.images.length) {
 					offer.images.forEach((image, index) => {
+						if (index > 0) {
+							return;
+						}
+
 						offer.images[index] = offer.id + '_' + index + '.jpg';
 						download(image, __dirname+'/public/img/leboncoin/' + offer.images[index]);
 					})
