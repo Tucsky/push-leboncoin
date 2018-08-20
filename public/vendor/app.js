@@ -23,7 +23,7 @@ function setAsRegistered(state, newToken) {
 	if (state && newToken) {
 		token = newToken;
 	} else {
-		if (token) 
+		if (token)
 			messaging.deleteToken(token);
 
 		token = null;
@@ -132,7 +132,7 @@ function showOffer(offer, top) {
 		exists = $offer.length;
 
 	$offer = exists ? $offer : $('<div/>', {id: offer.id, class: 'grid-item offer col-xs-12 col-sm-6 col-md-4'}).html('<div class="card'+(top ? ' card-inverse bg-primary' : '')+'">\
-		'+(offer.images.length ? '<img class="card-img-top" src="" alt="'+offer.title+'">' : '')+'\
+		'+(offer.images && offer.images.length ? '<img class="card-img-top" src="" alt="'+offer.title+'">' : '')+'\
 		<div class="card-block">\
 			<h4 class="card-title"></h4>\
 			<div class="card-text">\
@@ -157,18 +157,21 @@ function showOffer(offer, top) {
 
 	$offer.find('.offer-ago').text(date.fromNow())
 	$offer.find('.offer-price').text(offer.price+' €');
-	$offer.find('a').attr('href', 'https://www.leboncoin.fr/velos/'+offer.id+'.htm');
+	$offer.find('a').attr('href', offer.link);
 
-	if (position && offer.latlng) {
-		var distance = getDistance(position, offer.latlng);
-		$offer.find('.offer-distance').text('('+(distance / 1000).toFixed(2)+'km)');
-	}
+	if (offer.location) {
+		var location = offer.location.city_label;
 
-	if (offer.images.length) {
-		$offer.find('.card-img-top').one('load', function() {
-			if (!exists)
-				$row.masonry(top ? 'prepended' : 'appended', $offer);
-		}).attr('src', 'img/leboncoin/'+offer.images[0]).attr('alt', offer.title);
+		if (position && offer.location && offer.location.lat && offer.location.lng) {
+			var distance = getDistance(position, {
+				lat: offer.location.lat,
+				lng: offer.location.lng
+			});
+
+			location += ' ('+(distance / 1000).toFixed(2)+'km)';
+		}
+
+		$offer.find('.offer-distance').text(location);
 	}
 
 	if (!exists) {
@@ -176,6 +179,14 @@ function showOffer(offer, top) {
 			$row.prepend($offer);
 		else
 			$row.append($offer);
+	}
+
+	if (offer.images && offer.images.length) {
+		$offer.find('.card-img-top').one('load', function() {
+			$row.masonry('appended', $offer);
+		}).attr('src', 'img/leboncoin/'+offer.images[0]).attr('alt', offer.title);
+	} else {
+		$row.masonry('appended', $offer);
 	}
 
 	if ($offer.find('.card-text p').height() > $offer.find('.card-text').height())
@@ -220,12 +231,12 @@ var isWorkerReady = function(registration) {
 var init = function() {
 
 	/* Register DOM events
-	*/ 
+	*/
 
 	$(window).scroll(function() {
 		if ($(window).scrollTop() + $(window).height() == $(document).height())
 			get();
-	}); 
+	});
 
 	$(document).ajaxComplete(function(e, xhr, settings) {
 		var response = xhr.responseJSON || {};
@@ -243,7 +254,7 @@ var init = function() {
 		if (response.message)
 			ohSnap(response.message, {color: 'blue'});
 	});
-	
+
 	$('[data-action=subscribe]').on('click', subscribe);
 	$('[data-action=unsubscribe]').on('click', unsubscribe);
 
@@ -258,7 +269,7 @@ var init = function() {
 	});
 
 	/* Bootstrap worker
-	*/ 
+	*/
 
 	worker.onmessage = function() {
 		console.log('received message');
@@ -268,9 +279,9 @@ var init = function() {
 		if (!payload || !payload.data || !payload.data.offer)
 			return ohSnap('Invalid payload object received', {color: 'red'});
 
-		try{ 
+		try{
 			var offer = JSON.parse(payload.data.offer)
-		} catch(e) { 
+		} catch(e) {
 			var offer = null;
 
 			ohSnap("Invalid offer received\n"+e.message, {color: 'red'});
@@ -278,7 +289,7 @@ var init = function() {
 
 		if (offer)
 			showOffer(offer, true);
-	});   
+	});
 
 	if (navigator.geolocation)
 		navigator.geolocation.getCurrentPosition(function(coordinates) {
@@ -292,10 +303,13 @@ var init = function() {
 			$row.find('> .offer').each(function() {
 				var offer = $(this).data('offer');
 
-				if (!offer.latlng)
+				if (!offer.location || !offer.location.lat || !offer.location.lng)
 					return;
 
-				var distance = getDistance(position, offer.latlng);
+				var distance = getDistance(position, {
+					lat: offer.location.lat,
+					lng: offer.location.lng
+				});
 
 				$(this).find('.offer-distance').text('('+(distance / 1000).toFixed(2)+'km)');
 			})

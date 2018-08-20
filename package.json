@@ -10,14 +10,12 @@
   "author": "Kevin Rostagni",
   "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.17.2",
-    "bootstrap": "^4.0.0-alpha.6",
-    "cheerio": "^1.0.0-rc.1",
-    "express": "^4.15.3",
-    "firebase-admin": "^5.0.0",
-    "moment": "^2.18.1",
-    "request": "^2.81.0",
-    "windows-1252": "^1.0.0"
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "firebase-admin": "^6.0.0",
+    "leboncoin-api": "0.0.31",
+    "moment": "^2.22.2",
+    "request": "^2.88.0"
   },
   "devDependencies": {
     "gulp": "^3.9.1",

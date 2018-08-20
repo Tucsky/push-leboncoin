@@ -5,12 +5,12 @@ if (typeof importScripts === 'function') {
 }
 
 var config = {
-	apiKey: "AIzaSyCRSoBL6dKwZ-jlp22oXagCRVIKFOQBsvs",
-	authDomain: "project-2792471436428079009.firebaseapp.com",
-	databaseURL: "https://project-2792471436428079009.firebaseio.com",
-	projectId: "project-2792471436428079009",
-	storageBucket: "project-2792471436428079009.appspot.com",
-	messagingSenderId: "855601272318"
+	apiKey: "AIzaSyAI4aG_wDNXCUww-XCQ-CGgG4V_9a9RGYM",
+	authDomain: "tucsky-205309.firebaseapp.com",
+	databaseURL: "https://tucsky-205309.firebaseio.com",
+	projectId: "tucsky-205309",
+	storageBucket: "tucsky-205309.appspot.com",
+	messagingSenderId: "811100194361"
 };
 
 firebase.initializeApp(config);
@@ -93,14 +93,17 @@ if (typeof importScripts === 'function') {
 		if (!offer)
 			return self.registration.showNotification('Invalid offer', {body: 'JSON parse failed'});
 
-		if (self.position && offer.latlng)
-			distance = getDistance(self.position, offer.latlng);
+		if (self.position && offer.location && offer.location.lat && offer.location.lng)
+			distance = getDistance(self.position, {
+				lat: offer.location.lat,
+				lng: offer.location.lng
+			});
 
 		return self.registration.showNotification(offer.title, {
 			tag: 'offer-'+offer.id,
-			body: offer.price+'€, '+offer.address+(distance !== null ? ' ('+(distance / 1000).toFixed(2)+'km)' : ''),
-			icon: offer.images.length ? 'img/leboncoin/'+offer.images[0] : 'img/logo.192.png',
-			image: offer.images.length ? 'img/leboncoin/'+offer.images[0] : 'img/logo.192.png',
+			body: offer.price + '€' + (offer.location ? ', ' + offer.location.city_label + ' ' + (distance !== null ? ' (' + (distance / 1000).toFixed(2)+'km)' : '') : ''),
+			icon: offer.images && offer.images.length ? 'img/leboncoin/'+offer.images[0] : 'img/logo.192.png',
+			image: offer.images && offer.images.length ? 'img/leboncoin/'+offer.images[0] : 'img/logo.192.png',
 			vibrate: [20, 10, 750],
 			actions: [{
 				action: 'go',
@@ -108,7 +111,7 @@ if (typeof importScripts === 'function') {
 				icon: 'img/logo.192.png'
 			}],
 			data: {
-				url: 'https://www.leboncoin.fr/category/'+offer.id+'.htm'
+				url: offer.link
 			}
 		});
 	});
