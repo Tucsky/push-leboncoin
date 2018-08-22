@@ -1,5 +1,6 @@
 var $row = $('.row-masonry'),
-	position, token, worker;
+		$average = $('#average'),
+		position, token, worker;
 
 function register(newToken) {
 	if (!newToken)
@@ -32,7 +33,7 @@ function setAsRegistered(state, newToken) {
 
 	$('#registerBlock')[state ? 'slideUp' : 'slideDown'](200);
 	$('#registrationBlock')[!state ? 'slideUp' : 'slideDown'](200, function() {
-		$row.masonry('layout');
+		$row.isotope('layout');
 	})
 		.find('.token')
 		.val(newToken);
@@ -117,6 +118,12 @@ function get() {
 				return ohSnap('You reached the end of the list', {color: 'red'});
 			}
 		}
+		
+		$average
+			.find('span')
+			.text(response.avgSqrtPrice.total + '€')
+			.parent()
+			.slideDown();
 
 		response.offers.reverse();
 		response.offers.forEach(function(offer) {
@@ -129,20 +136,18 @@ function get() {
 
 function showOffer(offer, top) {
 	var $offer = $('#'+offer.id),
-		exists = $offer.length;
+			exists = $offer.length;
 
 	$offer = exists ? $offer : $('<div/>', {id: offer.id, class: 'grid-item offer col-xs-12 col-sm-6 col-md-4'}).html('<div class="card'+(top ? ' card-inverse bg-primary' : '')+'">\
-		'+(offer.images && offer.images.length ? '<img class="card-img-top" src="" alt="'+offer.title+'">' : '')+'\
+		<div class="card-overlay"></div>\
+		'+(offer.images && offer.images.length ? '<a href="#" target="_blank"><img class="card-img-top" src="" alt="'+offer.title+'"></a>' : '')+'\
 		<div class="card-block">\
-			<h4 class="card-title"></h4>\
+			<h4 class="card-title"><a href="#" target="_blank"></a></h4>\
 			<div class="card-text">\
 				<p></p>\
 			</div>\
 			<div class="footer">\
-				<small>\
-					<span class="offer-ago"></span>\
-					<span class="offer-distance"></span>\
-				</small>\
+				<small class="offer-ago"></small>\
 				<a href="#" target="_blank" class="btn btn-primary" title="Show offer"><i class="fa fa-shopping-cart"></i> <span class="offer-price"></span></a>\
 			</div>\
 		</div>\
@@ -150,10 +155,12 @@ function showOffer(offer, top) {
 
 	$offer.data('offer', offer);
 
-	var date = moment(offer.date);
+	var date = moment(offer.date),
+			$metas = $offer.find('.card-overlay');
 
-	$offer.find('.card-title').text(offer.title);
-	$offer.find('.card-text p').html(offer.description);
+	$offer.find('.card-title a').text(offer.title);
+
+	$offer.find('.card-text p').html(offer.description.replace(/\n/g, '<br>'));
 
 	$offer.find('.offer-ago').text(date.fromNow())
 	$offer.find('.offer-price').text(offer.price+' €');
@@ -161,6 +168,8 @@ function showOffer(offer, top) {
 
 	if (offer.location) {
 		var location = offer.location.city_label;
+		
+		$metas.append($('<div/>', {class: 'offer-location'}).html(location))
 
 		if (position && offer.location && offer.location.lat && offer.location.lng) {
 			var distance = getDistance(position, {
@@ -169,9 +178,15 @@ function showOffer(offer, top) {
 			});
 
 			location += ' ('+(distance / 1000).toFixed(2)+'km)';
+		
+			$metas.append($('<div/>', {class: 'offer-location'}).html((distance / 1000).toFixed(2) + 'km'));
 		}
+	}
 
-		$offer.find('.offer-distance').text(location);
+	if (offer.attributes.square) {
+		$metas
+			.append($('<div/>', {class: 'offer-square'}).html(offer.attributes.square + ' <sup>m²</sup>'))
+			.append($('<div/>', {class: 'offer-square-price'}).html((offer.price / offer.attributes.square).toFixed(2) + '€ <sup>/m²</sup>'));
 	}
 
 	if (!exists) {
@@ -182,11 +197,15 @@ function showOffer(offer, top) {
 	}
 
 	if (offer.images && offer.images.length) {
-		$offer.find('.card-img-top').one('load', function() {
-			$row.masonry('appended', $offer);
+		$offer.find('.card-img-top').one('load error', function() {
+			$row
+				.isotope('appended', $offer)
+				.isotope('layout');
 		}).attr('src', 'img/leboncoin/'+offer.images[0]).attr('alt', offer.title);
 	} else {
-		$row.masonry('appended', $offer);
+		$row
+			.isotope('appended', $offer)
+			.isotope('layout');
 	}
 
 	if ($offer.find('.card-text p').height() > $offer.find('.card-text').height())
@@ -258,14 +277,13 @@ var init = function() {
 	$('[data-action=subscribe]').on('click', subscribe);
 	$('[data-action=unsubscribe]').on('click', unsubscribe);
 
-	$('.row-masonry').masonry({
-		columnWidth: '.grid-sizer',
+	$('.row-masonry').isotope({
 		itemSelector: '.grid-item',
-		percentPosition: true,
+		layoutMode: 'masonry'
 	}).on('click', '.card .card-text-overflow', function() {
 		var $item = $(this).toggleClass('more').closest('.grid-item');
 
-		$row.masonry('layout');
+		$row.isotope('layout');
 	});
 
 	/* Bootstrap worker
@@ -311,7 +329,7 @@ var init = function() {
 					lng: offer.location.lng
 				});
 
-				$(this).find('.offer-distance').text('('+(distance / 1000).toFixed(2)+'km)');
+				$(this).find('.offer-location').append(' (' + (distance / 1000).toFixed(2) + 'km)');
 			})
 		});
 	else

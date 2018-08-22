@@ -71,10 +71,17 @@ if (!fs.existsSync('credentials.json')) {
 /* Storage
 */
 
-var tokens = require('./tokens.json') || [],
-	config = require('./config.json') || {},
-	offers = [],
-	offers_ids = [];
+let persistence = {};
+
+try {
+	persistence = JSON.parse(fs.readFileSync('persistence.json'));
+} catch (error) {}
+
+var config = require('./config.json') || {},
+	tokens = persistence.tokens || [],
+	offers = persistence.offers || [],
+	offers_ids = persistence.offers_ids || [],
+	avgSqrtPrice = getAvgSqrtPrice(offers),
 	notified = null;
 
 console.log("[tokens] "+tokens.length+" tokens loaded");
@@ -108,13 +115,10 @@ app.post('/register', function (req, res) {
 	}
 
 	if (tokens.indexOf(token) > -1) {
-		console.error('[tokens] Already registered');
 		return res.json({success: true, message: "Already registered"});
 	}
 
 	tokens.push(token);
-
-	save();
 
 	console.info('[tokens] Registered');
 	return res.json({success: true, message: "Registered"});
@@ -137,8 +141,6 @@ app.post('/unsubscribe', function (req, res) {
 
 	tokens.splice(index, 1);
 
-	save();
-
 	console.info('[tokens] Unsubscribed');
 	return res.json({success: true, message: "Unsubscribed"});
 });
@@ -150,18 +152,14 @@ app.post('/offers', function (req, res) {
 	var id = req.body.id;
 
 	if (!id) {
-		console.log('[debug] Slice', offers.length - 15, offers.length);
 		var items = offers.slice(offers.length - 15, offers.length);
-	}
-	else {
+	} else {
 		var index = null;
 
-		console.log('[debug] Looking for id "'+id+'"');
 		for (var i=0; i<offers.length; i++) {
-			console.log('[debug] Offer id comparison', id == offers[i].id ? 'found' : 'nope');
 			if (id == offers[i].id) {
 				index = i;
-				console.log('[debug] Index is', i, offers[i].id, offers[i].title);
+
 				break;
 			}
 		}
@@ -169,11 +167,13 @@ app.post('/offers', function (req, res) {
 		if (index === null)
 			return res.json({success: false, error: "The provided id doesn't match with any active offers"});
 
-		console.log('[debug] Slice', Math.max(0, index - 15), index);
 		var items = offers.slice(Math.max(0, index - 15), index);
 	}
 
-	return res.json({success: true, offers: items});
+	return res.json({success: true, offers: items, avgSqrtPrice: {
+		page: getAvgSqrtPrice(items),
+		total: avgSqrtPrice
+	}});
 })
 
 app.get('/', function (req, res) {
@@ -215,7 +215,7 @@ process.stdin.on('data', function(text) {
 		break;
 		case 'flush':
 			console.log('[tokens] Flush tokens');
-			save([]);
+			tokens = [];
 		break;
 	}
 });
@@ -225,18 +225,6 @@ process.stdin.on('data', function(text) {
 
 var random_str = function() {
 	return Math.random().toString(36).substring();
-}
-
-var save = function(newTokens) {
-	if (typeof newTokens !== 'undefined')
-		if (typeof newTokens === 'string' && tokens.indexOf(newTokens) === -1)
-			tokens.push(newTokens);
-		else
-			tokens = newTokens;
-
-	fs.writeFile('tokens.json', JSON.stringify(tokens), 'utf8', function() {
-		console.log('[tokens] '+tokens.length+' token'+(tokens.length > 1 ? 's' : '')+' in memory');
-	});
 }
 
 var download = function(uri, path, callback){
@@ -303,6 +291,8 @@ var getOffers = function() {
 				offers.push(offer);
 			})
 
+			avgSqrtPrice = getAvgSqrtPrice(offers);
+
 			// 10 sec delay before sending the notifications to be sure that the images are up and everythings alright
 			setTimeout(sendNotifications, config.countdown);
 		}
@@ -319,7 +309,7 @@ var sendNotifications = function(n) {
 	if (!tokens.length)
 		return console.error('[push] No devices registered');
 
-	list(offers, 16);
+	// list(offers, 16);
 
 	if (n && n > 0) {
 		console.log('[debug] Slice', offers.length - n, offers.length);
@@ -361,7 +351,6 @@ var sendNotifications = function(n) {
 						case 'messaging/registration-token-not-registered':
 							console.log('[tokens] Unsubscribing token');
 							tokens.splice(indexDevice, 1);
-							save();
 						break;
 					}
 
@@ -376,6 +365,34 @@ var sendNotifications = function(n) {
 			console.log('[push] ERROR', error);
 		});
 	})
+}
+
+function updatePersistence() {
+	return new Promise((resolve, reject) => {
+		fs.writeFile('persistence.json', JSON.stringify({
+			tokens: tokens,
+			offers_ids: offers_ids,
+			offers: offers,
+		}), err => {
+			if (err) {
+				console.error(`[persistence] Failed to write persistence.json\n\t`, err);
+				return resolve(false);
+			}
+
+			return resolve(true);
+		});
+	});
+}
+
+function getAvgSqrtPrice(offers) {
+	const offersWithSquareAttribute = offers
+		.filter(offer => offer.attributes.square);
+
+	if (!offersWithSquareAttribute.length) {
+		return 0;
+	}
+
+	return +(offersWithSquareAttribute.map(offer => offer.price / (offer.attributes.square)).reduce((a, b) => a + b) / offersWithSquareAttribute.length).toFixed(2);
 }
 
 var list = function(data, n, title) {
@@ -398,3 +415,17 @@ getOffers();
 
 // Delay in ms before getting new results
 setInterval(getOffers, config.interval);
+
+process.on('SIGINT', function() {
+	console.log('SIGINT');
+
+	Promise.all([updatePersistence()]).then(data => {
+		console.log('[server/exit] Goodbye')
+
+		process.exit();
+	}).catch(err => {
+		console.log(`[server/exit] Something went wrong when executing SIGINT script${err && err.message ? "\n\t" + err.message : ''}`);
+
+		process.exit();
+	})
+});

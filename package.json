@@ -13,7 +13,7 @@
     "body-parser": "^1.18.3",
     "express": "^4.16.3",
     "firebase-admin": "^6.0.0",
-    "leboncoin-api": "0.0.31",
+    "leboncoin-api": "github:tucsky/leboncoin-api",
     "moment": "^2.22.2",
     "request": "^2.88.0"
   },

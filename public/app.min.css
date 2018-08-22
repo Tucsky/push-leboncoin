@@ -79,7 +79,8 @@ a:hover {
 abbr[title] {
   border-bottom: none;
   text-decoration: underline;
-  text-decoration: underline dotted; }
+  -webkit-text-decoration: underline dotted;
+          text-decoration: underline dotted; }
 
 b,
 strong {
@@ -295,7 +296,7 @@ html {
 
 html {
   -ms-overflow-style: scrollbar;
-  -webkit-tap-highlight-color: transparent; }
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0); }
 
 body {
   font-family: Roboto, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -1771,10 +1772,10 @@ pre {
   .form-control::-webkit-input-placeholder {
     color: #636c72;
     opacity: 1; }
-  .form-control::-moz-placeholder {
+  .form-control:-ms-input-placeholder {
     color: #636c72;
     opacity: 1; }
-  .form-control:-ms-input-placeholder {
+  .form-control::-ms-input-placeholder {
     color: #636c72;
     opacity: 1; }
   .form-control::placeholder {
@@ -1787,7 +1788,6 @@ pre {
     cursor: not-allowed; }
 
 select.form-control:not([size]):not([multiple]) {
-  height: -webkit-calc(2.25rem + 2px);
   height: calc(2.25rem + 2px); }
 
 select.form-control:focus::-ms-value {
@@ -1799,23 +1799,17 @@ select.form-control:focus::-ms-value {
   display: block; }
 
 .col-form-label {
-  padding-top: -webkit-calc(0.5rem - 1px * 2);
   padding-top: calc(0.5rem - 1px * 2);
-  padding-bottom: -webkit-calc(0.5rem - 1px * 2);
   padding-bottom: calc(0.5rem - 1px * 2);
   margin-bottom: 0; }
 
 .col-form-label-lg {
-  padding-top: -webkit-calc(0.75rem - 1px * 2);
   padding-top: calc(0.75rem - 1px * 2);
-  padding-bottom: -webkit-calc(0.75rem - 1px * 2);
   padding-bottom: calc(0.75rem - 1px * 2);
   font-size: 1.25rem; }
 
 .col-form-label-sm {
-  padding-top: -webkit-calc(0.25rem - 1px * 2);
   padding-top: calc(0.25rem - 1px * 2);
-  padding-bottom: -webkit-calc(0.25rem - 1px * 2);
   padding-bottom: calc(0.25rem - 1px * 2);
   font-size: 0.875rem; }
 
@@ -2890,7 +2884,6 @@ tbody.collapse.show {
 .custom-select {
   display: inline-block;
   max-width: 100%;
-  height: -webkit-calc(2.25rem + 2px);
   height: calc(2.25rem + 2px);
   padding: 0.375rem 1.75rem 0.375rem 0.75rem;
   line-height: 1.25;
@@ -3491,7 +3484,6 @@ tbody.collapse.show {
   background-color: #f7f7f9;
   border-bottom: 1px solid rgba(0, 0, 0, 0.125); }
   .card-header:first-child {
-    border-radius: -webkit-calc(0.25rem - 1px) -webkit-calc(0.25rem - 1px) 0 0;
     border-radius: calc(0.25rem - 1px) calc(0.25rem - 1px) 0 0; }
 
 .card-footer {
@@ -3499,7 +3491,6 @@ tbody.collapse.show {
   background-color: #f7f7f9;
   border-top: 1px solid rgba(0, 0, 0, 0.125); }
   .card-footer:last-child {
-    border-radius: 0 0 -webkit-calc(0.25rem - 1px) -webkit-calc(0.25rem - 1px);
     border-radius: 0 0 calc(0.25rem - 1px) calc(0.25rem - 1px); }
 
 .card-header-tabs {
@@ -3596,7 +3587,6 @@ tbody.collapse.show {
   border-left: 0; }
 
 .card-img {
-  border-radius: -webkit-calc(0.25rem - 1px);
   border-radius: calc(0.25rem - 1px); }
 
 .card-img-overlay {
@@ -3608,15 +3598,11 @@ tbody.collapse.show {
   padding: 1.25rem; }
 
 .card-img-top {
-  border-top-right-radius: -webkit-calc(0.25rem - 1px);
   border-top-right-radius: calc(0.25rem - 1px);
-  border-top-left-radius: -webkit-calc(0.25rem - 1px);
   border-top-left-radius: calc(0.25rem - 1px); }
 
 .card-img-bottom {
-  border-bottom-right-radius: -webkit-calc(0.25rem - 1px);
   border-bottom-right-radius: calc(0.25rem - 1px);
-  border-bottom-left-radius: -webkit-calc(0.25rem - 1px);
   border-bottom-left-radius: calc(0.25rem - 1px); }
 
 @media (min-width: 576px) {
@@ -3691,10 +3677,8 @@ tbody.collapse.show {
 @media (min-width: 576px) {
   .card-columns {
     -webkit-column-count: 3;
-       -moz-column-count: 3;
             column-count: 3;
     -webkit-column-gap: 1.25rem;
-       -moz-column-gap: 1.25rem;
             column-gap: 1.25rem; }
     .card-columns .card {
       display: inline-block;
@@ -4516,9 +4500,7 @@ button.close {
   font-size: 1rem;
   background-color: #f7f7f7;
   border-bottom: 1px solid #ebebeb;
-  border-top-right-radius: -webkit-calc(0.3rem - 1px);
   border-top-right-radius: calc(0.3rem - 1px);
-  border-top-left-radius: -webkit-calc(0.3rem - 1px);
   border-top-left-radius: calc(0.3rem - 1px); }
   .popover-title:empty {
     display: none; }
@@ -9505,7 +9487,8 @@ a.text-gray-dark:focus, a.text-gray-dark:hover {
 /* Actual styles
 */
 body {
-  margin: 15px 0; }
+  margin: 15px 0;
+  background-color: #f1f1f1; }
   @media (min-width: 992px) {
     body {
       margin: 10vh 0; } }
@@ -9526,6 +9509,15 @@ h1 {
   h1 div {
     display: inline-block;
     color: #f0ad4e; }
+
+h2 {
+  font-weight: 400;
+  text-align: center;
+  margin: 0 0 1em;
+  font-size: 2em; }
+  h2 span {
+    font-weight: 700;
+    color: red; }
 
 #ohsnap {
   position: fixed;
@@ -9570,6 +9562,33 @@ h1 {
   width: 100%;
   background-color: #f0ad4e; }
 
+.row-masonry .offer .card .card-overlay {
+  position: absolute;
+  right: -1px;
+  top: -1px;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  font-size: 12px; }
+  .row-masonry .offer .card .card-overlay > div {
+    padding: 4px 6px;
+    font-size: .8em;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white; }
+    .row-masonry .offer .card .card-overlay > div:first-child {
+      border-bottom-left-radius: 4px; }
+    .row-masonry .offer .card .card-overlay > div:last-child {
+      border-top-right-radius: 4px; }
+  .row-masonry .offer .card .card-overlay + .card-block {
+    padding-top: 2rem; }
+
+.row-masonry .offer .card .card-title {
+  font-weight: 300; }
+  .row-masonry .offer .card .card-title a {
+    text-decoration: none;
+    color: #222; }
+
 .row-masonry .offer .card .card-text {
   max-height: 20vh;
   overflow: hidden;
@@ -9594,11 +9613,20 @@ h1 {
 
 .row-masonry .offer .card .footer {
   position: relative;
-  text-align: right; }
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: end;
+  -webkit-align-items: flex-end;
+      -ms-flex-align: end;
+          align-items: flex-end;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  margin-top: 15px; }
   .row-masonry .offer .card .footer small {
-    position: absolute;
-    bottom: 0;
-    left: 0;
     opacity: .75; }
 
 .row-masonry .offer .card.card-inverse a.btn {

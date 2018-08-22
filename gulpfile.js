@@ -36,7 +36,7 @@ gulp.task('js', function() {
 		bowerPath+'bowser/src/bowser.js', 
 		bowerPath+'modernizr.min.js', 
 		bowerPath+'jquery/dist/jquery.min.js', 
-		bowerPath+'masonry/dist/masonry.pkgd.min.js', 
+		bowerPath+'isotope/isotope.js', 
 		bowerPath+'tether/dist/js/tether.js', 
 		bowerPath+'bootstrap/dist/js/bootstrap.js',
 		bowerPath+'selectize/dist/js/standalone/selectize.js',

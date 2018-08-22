@@ -6,11 +6,10 @@
     "Kevin Rostagni"
   ],
   "license": "ISC",
-  "homepage": "",
+  "homepage": "http://github.com",
   "private": true,
   "dependencies": {
     "bowser": "^1.6.1",
-    "masonry": "^4.1.1",
     "bootstrap": "v4.0.0-alpha.6",
     "selectize": "^0.12.4",
     "oh-snap": "*",
