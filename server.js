@@ -41,7 +41,7 @@ if (!fs.existsSync('config.json'))
 		},
 		"port": 1337,
 		"whitelist": [],
-		"blacklist": [],
+		"blacklist": ['studette'],
 		"interval": 1000*60*3,
 		"countdown": 1000*10,
 		"timetolive": 60*60*3,
@@ -79,7 +79,11 @@ try {
 
 var config = require('./config.json') || {},
 	tokens = persistence.tokens || [],
-	offers = persistence.offers || [],
+	offers = (persistence.offers || []).map(offer => {
+		offer.date = moment(offer.date);
+
+		return offer;
+	}),
 	offers_ids = persistence.offers_ids || [],
 	avgSqrtPrice = getAvgSqrtPrice(offers),
 	notified = null;
