@@ -118,7 +118,7 @@ function get() {
 				return ohSnap('You reached the end of the list', {color: 'red'});
 			}
 		}
-		
+
 		$average
 			.find('span')
 			.text(response.avgSqrtPrice.total + '€')
@@ -168,7 +168,7 @@ function showOffer(offer, top) {
 
 	if (offer.location) {
 		var location = offer.location.city_label;
-		
+
 		$metas.append($('<div/>', {class: 'offer-location'}).html(location))
 
 		if (position && offer.location && offer.location.lat && offer.location.lng) {
@@ -178,7 +178,7 @@ function showOffer(offer, top) {
 			});
 
 			location += ' ('+(distance / 1000).toFixed(2)+'km)';
-		
+
 			$metas.append($('<div/>', {class: 'offer-location'}).html((distance / 1000).toFixed(2) + 'km'));
 		}
 	}
@@ -253,7 +253,7 @@ var init = function() {
 	*/
 
 	$(window).scroll(function() {
-		if ($(window).scrollTop() + $(window).height() == $(document).height())
+		if ($(window).scrollTop() + window.innerHeight == $(document).height())
 			get();
 	});
 
