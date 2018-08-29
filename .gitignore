@@ -5,3 +5,4 @@ jspm_packages/
 credentials.json
 tokens.json
 config.json
+persistence.json
