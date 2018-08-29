@@ -355,8 +355,6 @@ var sendNotifications = function(n) {
 		notified += data.length;
 	}
 
-	list(data, null, "About to send "+data.length+" offers");
-
 	data.forEach(function(offer, indexMessage) {
 		admin.messaging().sendToDevice(tokens, {
 			data: {

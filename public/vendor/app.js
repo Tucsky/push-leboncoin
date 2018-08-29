@@ -156,7 +156,6 @@ function get(search) {
 
 		response.offers.reverse();
 		response.offers.forEach(function(offer) {
-			console.log(offer.date);
 			showOffer(offer);
 		})
 	}).always(function() {
