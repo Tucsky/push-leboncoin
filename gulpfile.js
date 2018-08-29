@@ -43,6 +43,7 @@ gulp.task('js', function() {
 		bowerPath+'oh-snap/ohsnap.min.js',
 		bowerPath+'moment/moment.js',
 		bowerPath+'firebase/firebase.js',
+		bowerPath+'tiny-slider/dist/min/tiny-slider.js',
 
 		// App
 		bowerPath+'../worker.js',

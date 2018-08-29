@@ -163,7 +163,7 @@ function get(search) {
 	})
 }
 
-function updateDescriptionOverflow($offer) {
+function refreshTextExpander($offer) {
 	if ($offer.find('.card-text p').height() > $offer.find('.card-text').height())
 		$offer.find('.card-text').addClass('card-text-overflow');
 	else
@@ -171,36 +171,40 @@ function updateDescriptionOverflow($offer) {
 }
 
 function showOffer(offer, top) {
-	var $offer = $('#'+offer.id),
-			exists = $offer.length;
+	if ($('#offer-'+offer.id).length) {
+		return;
+	}
 
-	$offer = exists ? $offer : $('<div/>', {id: offer.id, class: 'grid-item offer col-xs-12 col-sm-6 col-md-4'}).html('<div class="card'+(top ? ' card-inverse bg-primary' : '')+'">\
-		<div class="card-overlay"></div>\
-		'+(offer.images && offer.images.length ? '<a href="#" target="_blank"><img class="card-img-top" src="img/leboncoin/'+offer.images[0]+'" alt="'+offer.title+'"></a>' : '')+'\
-		<div class="card-block">\
-			<h4 class="card-title"><a href="#" target="_blank"></a></h4>\
-			<div class="card-text">\
-				<p></p>\
-			</div>\
-			<div class="footer">\
-				<small class="offer-ago"></small>\
-				<a href="#" target="_blank" class="btn btn-primary" title="Show offer"><i class="fa fa-shopping-cart"></i> <span class="offer-price"></span></a>\
-			</div>\
-		</div>\
-	</div>');
+	$offer = $('<div/>', {id: 'offer-' + offer.id, class: 'grid-item offer col-xs-12 col-sm-6 col-md-4'}).html(`
+		<div class="card ${top ? 'card-inverse bg-primary' : ''}">
+			${offer.images && offer.images.length ? `
+				<div class="card-img-top"><div class="offer-slider">
+					${offer.images.map(url => `
+						<a href="#">
+							<img class="tns-lazy-img" data-src="${url}" alt="${offer.title}">
+						</a>
+					`)}
+				</div></div>
+			` : ''}
+			<div class="card-overlay"></div>
+			<div class="card-block">
+				<h4 class="card-title"><a href="${offer.link}" target="_blank">${offer.title}</a></h4>
+				<div class="card-text card-text-overflow">
+					<p>${offer.description.replace(/\n/g, '<br>')}</p>
+				</div>
+				<div class="footer"> 
+					<small class="offer-ago">${moment(offer.date).fromNow()}</small> 
+					<a href="${offer.link}" target="_blank" class="btn btn-primary" title="Show offer">
+						<i class="fa fa-shopping-cart"></i> <span class="offer-price">${offer.price} €</span>
+					</a> 
+				</div>
+			</div>
+		</div>
+	`);
 
 	$offer.data('offer', offer);
 
-	var date = moment(offer.date),
-			$metas = $offer.find('.card-overlay');
-
-	$offer.find('.card-title a').text(offer.title);
-
-	$offer.find('.card-text p').html(offer.description.replace(/\n/g, '<br>'));
-
-	$offer.find('.offer-ago').text(date.fromNow())
-	$offer.find('.offer-price').text(offer.price+' €');
-	$offer.find('a').attr('href', offer.link);
+	var $metas = $offer.find('.card-overlay');
 
 	if (offer.location) {
 		var location = offer.location.city_label;
@@ -225,31 +229,23 @@ function showOffer(offer, top) {
 			.append($('<div/>', {class: 'offer-square-price'}).html((offer.price / offer.attributes.square).toFixed(2) + '€ <sup>/m²</sup>'));
 	}
 
+	$row
+		.append($offer)
+		.isotope('appended', $offer);
+
 	if (offer.images && offer.images.length) {
-		var img = new Image();
-
-		img.onload = function() {
-			$row.append($offer).isotope('appended', $offer);
-
-			updateDescriptionOverflow($offer);
-		};
-
-		img.onerror = function() {
-			$row.append($offer);
-
-			$offer.find('.card-img-top').parent().remove();
-
-			$row.isotope('appended', $offer);
-
-			updateDescriptionOverflow($offer);
-		};
-
-		img.src = 'img/leboncoin/' + offer.images[0];
-	} else {
-		$row.append($offer).isotope('appended', $offer);
-
-		updateDescriptionOverflow($offer);
+		tns({
+			container: `#offer-${offer.id} .offer-slider`,
+			lazyload: true,
+			mouseDrag: true,
+			controls: false,
+			items: 1,
+			autoplay: false,
+			nav: false,
+		});
 	}
+
+	refreshTextExpander($offer);
 }
 
 navigator.serviceWorker.register('./worker.js')

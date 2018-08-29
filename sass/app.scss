@@ -39,6 +39,7 @@ $fa-font-path: 'vendor/font-awesome/fonts/';
 
 @import 'public/vendor/bootstrap/scss/bootstrap';
 @import 'public/vendor/font-awesome/scss/font-awesome';
+@import 'public/vendor/tiny-slider/src/tiny-slider.scss';
 
 /* Actual styles
 */
@@ -157,37 +158,57 @@ h3.average {
 
 	.offer {
 		.card {
-			img {
-				display: block;
-				width: 100%;
-				background-color: $brand-warning;
-				min-height: 100px;
+			.card-img-top {
+				overflow: hidden;
+
+				~ .card-block {
+					padding-top: 1em;
+				}
+			}
+
+			.offer-slider {
+				height: 300px;
+				position: relative;
+
+				a {
+					height: 100%;
+				}
+
+				img {
+					display: block;
+					height: 100%;
+					width: 100%;
+					margin: 0 auto;
+					object-fit: cover;
+				}
+			}
+
+			.card-block {
+				padding-top: 2rem;
 			}
 
 			.card-overlay {
 				position: absolute;
-				right: -1px;
-				top: -1px;
+				right: 0;
+				top: 0;
 				display: flex;
 				font-size: 12px;
 
 				> div {
-					padding: 4px 6px;
+					padding: 4px 0 4px 4px;
 					font-size: .8em;
-					background-color: rgba(black, .5);
+					background-color: rgba(black, .75);
 					color: white;
 
 					&:first-child {
 						border-bottom-left-radius: 4px;
+						padding-left: 6px;
 					}
 
 					&:last-child {
 						border-top-right-radius: 4px;
+						padding-right: 6px;
 					}
-				}
-
-				+ .card-block {
-					padding-top: 2rem;
 				}
 			}
 
@@ -243,23 +264,6 @@ h3.average {
 			&.card-inverse {
 				a.btn {
 					@include button-variant($btn-primary-color, darken($brand-primary, 10%), $btn-primary-border);
-				}
-
-				&:before {
-					@include button-variant($btn-danger-color, $brand-danger, $btn-danger-border);
-					content: 'NEW';
-					position: absolute;
-					right: 0;
-					top: 0;
-					transform: translate(15%, -15%) scale(1);
-					border-radius: 4px;
-					color: #fff;
-					box-shadow: -10px 10px 10px rgba(0, 0, 0, 0.15);
-					color: white;
-					padding: 10px 15px;
-					font-weight: 600;
-					letter-spacing: 1px;
-					cursor: default;
 				}
 
 				.card-text-overflow:before {

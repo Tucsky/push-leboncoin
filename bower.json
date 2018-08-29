@@ -14,6 +14,7 @@
     "selectize": "^0.12.4",
     "oh-snap": "*",
     "moment": "^2.18.1",
-    "font-awesome": "fontawesome#^4.7.0"
+    "font-awesome": "fontawesome#^4.7.0",
+    "tiny-slider": "^2.8.6"
   }
 }

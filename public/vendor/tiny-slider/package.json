@@ -1,0 +1,31 @@
+{
+  "name": "tiny-slider",
+  "version": "2.8.6",
+  "description": "Vanilla javascript slider for all purposes, inspired by Owl Carousel.",
+  "main": "dist/tiny-slider.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "start": "nodemon --watch tests/js/tests-async.js --exec npm test",
+    "test": "npx babel tests/js/tests-async.js -o tests/js/tests-async-es5.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ganlanyuan/tiny-slider.git"
+  },
+  "keywords": [],
+  "author": "ganlanyuan <ganlanyuan@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ganlanyuan/tiny-slider/issues"
+  },
+  "homepage": "https://github.com/ganlanyuan/tiny-slider#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "nodemon": "^1.17.5"
+  }
+}

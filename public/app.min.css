@@ -9484,6 +9484,118 @@ a.text-gray-dark:focus, a.text-gray-dark:hover {
   overflow: visible;
   clip: auto; }
 
+.tns-outer {
+  padding: 0 !important; }
+  .tns-outer [hidden] {
+    display: none !important; }
+  .tns-outer [aria-controls], .tns-outer [data-action] {
+    cursor: pointer; }
+
+.tns-slider {
+  -webkit-transition: all 0s;
+  -o-transition: all 0s;
+  transition: all 0s; }
+  .tns-slider > .tns-item {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box; }
+
+.tns-horizontal.tns-subpixel {
+  white-space: nowrap; }
+  .tns-horizontal.tns-subpixel > .tns-item {
+    display: inline-block;
+    vertical-align: top;
+    white-space: normal; }
+
+.tns-horizontal.tns-no-subpixel:after {
+  content: '';
+  display: table;
+  clear: both; }
+
+.tns-horizontal.tns-no-subpixel > .tns-item {
+  float: left;
+  margin-right: -100%; }
+
+.tns-no-calc {
+  position: relative;
+  left: 0; }
+
+.tns-gallery {
+  position: relative;
+  left: 0;
+  min-height: 1px; }
+  .tns-gallery > .tns-item {
+    position: absolute;
+    left: -100%;
+    -webkit-transition: transform 0s, opacity 0s;
+    -webkit-transition: opacity 0s, -webkit-transform 0s;
+    transition: opacity 0s, -webkit-transform 0s;
+    -o-transition: transform 0s, opacity 0s;
+    transition: transform 0s, opacity 0s;
+    transition: transform 0s, opacity 0s, -webkit-transform 0s; }
+  .tns-gallery > .tns-slide-active {
+    position: relative;
+    left: unset !important; }
+  .tns-gallery > .tns-moving {
+    -webkit-transition: all 0.25s;
+    -o-transition: all 0.25s;
+    transition: all 0.25s; }
+
+.tns-lazy-img {
+  -webkit-transition: opacity 0.6s;
+  -o-transition: opacity 0.6s;
+  transition: opacity 0.6s;
+  opacity: 0.6; }
+  .tns-lazy-img.loaded {
+    opacity: 1; }
+
+.tns-ah {
+  -webkit-transition: height 0s;
+  -o-transition: height 0s;
+  transition: height 0s; }
+
+.tns-ovh {
+  overflow: hidden; }
+
+.tns-visually-hidden {
+  position: absolute;
+  left: -10000em; }
+
+.tns-transparent {
+  opacity: 0;
+  visibility: hidden; }
+
+.tns-fadeIn {
+  opacity: 1;
+  filter: alpha(opacity=100);
+  z-index: 0; }
+
+.tns-normal, .tns-fadeOut {
+  opacity: 0;
+  filter: alpha(opacity=0);
+  z-index: -1; }
+
+.tns-t-subp2 {
+  margin: 0 auto;
+  width: 310px;
+  position: relative;
+  height: 10px;
+  overflow: hidden; }
+
+.tns-t-ct {
+  width: 2333.33333%;
+  width: calc(100% * 70 / 3);
+  position: absolute;
+  right: 0; }
+  .tns-t-ct:after {
+    content: '';
+    display: table;
+    clear: both; }
+  .tns-t-ct > div {
+    width: 1.42857%;
+    width: calc(100% / 70);
+    height: 10px;
+    float: left; }
+
 /* Actual styles
 */
 body {
@@ -9571,32 +9683,47 @@ h3.average {
 .row-masonry > div {
   margin-bottom: 30px; }
 
-.row-masonry .offer .card img {
-  display: block;
-  width: 100%;
-  background-color: #f0ad4e;
-  min-height: 100px; }
+.row-masonry .offer .card .card-img-top {
+  overflow: hidden; }
+  .row-masonry .offer .card .card-img-top ~ .card-block {
+    padding-top: 1em; }
+
+.row-masonry .offer .card .offer-slider {
+  height: 300px;
+  position: relative; }
+  .row-masonry .offer .card .offer-slider a {
+    height: 100%; }
+  .row-masonry .offer .card .offer-slider img {
+    display: block;
+    height: 100%;
+    width: 100%;
+    margin: 0 auto;
+    -o-object-fit: cover;
+       object-fit: cover; }
+
+.row-masonry .offer .card .card-block {
+  padding-top: 2rem; }
 
 .row-masonry .offer .card .card-overlay {
   position: absolute;
-  right: -1px;
-  top: -1px;
+  right: 0;
+  top: 0;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
   font-size: 12px; }
   .row-masonry .offer .card .card-overlay > div {
-    padding: 4px 6px;
+    padding: 4px 0 4px 4px;
     font-size: .8em;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.75);
     color: white; }
     .row-masonry .offer .card .card-overlay > div:first-child {
-      border-bottom-left-radius: 4px; }
+      border-bottom-left-radius: 4px;
+      padding-left: 6px; }
     .row-masonry .offer .card .card-overlay > div:last-child {
-      border-top-right-radius: 4px; }
-  .row-masonry .offer .card .card-overlay + .card-block {
-    padding-top: 2rem; }
+      border-top-right-radius: 4px;
+      padding-right: 6px; }
 
 .row-masonry .offer .card .card-title {
   font-weight: 400; }
@@ -9665,43 +9792,6 @@ h3.average {
     background-color: #013e73;
     background-image: none;
     border-color: #01549b; }
-
-.row-masonry .offer .card.card-inverse:before {
-  color: #fff;
-  background-color: #d9534f;
-  border-color: #d9534f;
-  content: 'NEW';
-  position: absolute;
-  right: 0;
-  top: 0;
-  -webkit-transform: translate(15%, -15%) scale(1);
-      -ms-transform: translate(15%, -15%) scale(1);
-          transform: translate(15%, -15%) scale(1);
-  border-radius: 4px;
-  color: #fff;
-  -webkit-box-shadow: -10px 10px 10px rgba(0, 0, 0, 0.15);
-          box-shadow: -10px 10px 10px rgba(0, 0, 0, 0.15);
-  color: white;
-  padding: 10px 15px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  cursor: default; }
-  .row-masonry .offer .card.card-inverse:before:hover {
-    color: #fff;
-    background-color: #c9302c;
-    border-color: #c12e2a; }
-  .row-masonry .offer .card.card-inverse:before:focus, .row-masonry .offer .card.card-inverse:before.focus {
-    -webkit-box-shadow: 0 0 0 2px rgba(217, 83, 79, 0.5);
-            box-shadow: 0 0 0 2px rgba(217, 83, 79, 0.5); }
-  .row-masonry .offer .card.card-inverse:before.disabled, .row-masonry .offer .card.card-inverse:before:disabled {
-    background-color: #d9534f;
-    border-color: #d9534f; }
-  .row-masonry .offer .card.card-inverse:before:active, .row-masonry .offer .card.card-inverse:before.active,
-  .show > .row-masonry .offer .card.card-inverse:before.dropdown-toggle {
-    color: #fff;
-    background-color: #c9302c;
-    background-image: none;
-    border-color: #c12e2a; }
 
 .row-masonry .offer .card.card-inverse .card-text-overflow:before {
   background: -webkit-gradient(linear, left top, left bottom, from(rgba(2, 117, 216, 0)), to(#0275d8));
