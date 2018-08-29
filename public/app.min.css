@@ -9510,14 +9510,27 @@ h1 {
     display: inline-block;
     color: #f0ad4e; }
 
-h2 {
+.average {
   font-weight: 400;
   text-align: center;
-  margin: 0 0 1em;
-  font-size: 2em; }
-  h2 span {
+  margin: 0 0 1em; }
+  .average span {
     font-weight: 700;
     color: red; }
+
+h2.average {
+  font-size: 2em;
+  margin-bottom: 0; }
+
+h3.average {
+  font-size: 1.5em;
+  margin-top: 0;
+  color: #a2a2a2; }
+
+#term {
+  font-size: 10px;
+  font-family: monospace;
+  min-height: 100px; }
 
 #ohsnap {
   position: fixed;
@@ -9559,8 +9572,10 @@ h2 {
   margin-bottom: 30px; }
 
 .row-masonry .offer .card img {
+  display: block;
   width: 100%;
-  background-color: #f0ad4e; }
+  background-color: #f0ad4e;
+  min-height: 100px; }
 
 .row-masonry .offer .card .card-overlay {
   position: absolute;
@@ -9584,10 +9599,11 @@ h2 {
     padding-top: 2rem; }
 
 .row-masonry .offer .card .card-title {
-  font-weight: 300; }
+  font-weight: 400; }
   .row-masonry .offer .card .card-title a {
     text-decoration: none;
-    color: #222; }
+    color: #222;
+    word-break: break-word; }
 
 .row-masonry .offer .card .card-text {
   max-height: 20vh;

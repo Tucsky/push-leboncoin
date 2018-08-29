@@ -74,16 +74,32 @@ h1 {
 	}
 }
 
-h2 {
+.average {
 	font-weight: 400;
 	text-align: center;
 	margin: 0 0 1em;
-	font-size: 2em;
 
 	span {
 		font-weight: 700;
 		color: red;
 	}
+}
+
+h2.average {
+	font-size: 2em;
+	margin-bottom: 0;
+}
+
+h3.average {
+	font-size: 1.5em;
+	margin-top: 0;
+	color: #a2a2a2;
+}
+
+#term {
+	font-size: 10px;
+	font-family: monospace;
+	min-height: 100px;
 }
 
 #ohsnap {
@@ -112,7 +128,7 @@ h2 {
 			color: white;
 			background-color: $brand-danger;
 		}
-		
+
 		&.alert-green {
 			color: white;
 			background-color: $brand-success;
@@ -142,8 +158,10 @@ h2 {
 	.offer {
 		.card {
 			img {
+				display: block;
 				width: 100%;
 				background-color: $brand-warning;
+				min-height: 100px;
 			}
 
 			.card-overlay {
@@ -174,11 +192,12 @@ h2 {
 			}
 
 			.card-title {
-				font-weight: 300;
+				font-weight: 400;
 
 				a {
 					text-decoration: none;
 					color: #222;
+					word-break: break-word;
 				}
 			}
 

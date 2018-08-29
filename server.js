@@ -77,17 +77,18 @@ try {
 	persistence = JSON.parse(fs.readFileSync('persistence.json'));
 } catch (error) {}
 
-var config = require('./config.json') || {},
-	tokens = persistence.tokens || [],
-	offers = (persistence.offers || []).map(offer => {
-		offer.date = moment(offer.date);
+var config = require('./config.json') || {};
+var tokens = persistence.tokens || [];
+var offers = (persistence.offers || []).map(offer => {
+	offer.date = moment(offer.date);
+	return offer;
+});
 
-		return offer;
-	}),
-	offers_ids = persistence.offers_ids || [],
-	avgSqrtPrice = getAvgSqrtPrice(offers),
-	notified = null;
+var offers_ids = persistence.offers_ids || [];
+var avgSqrtPrice = getAvgSqrtPrice(offers);
+var notified = null;
 
+console.log("[tokens] "+offers.length+" offers loaded");
 console.log("[tokens] "+tokens.length+" tokens loaded");
 console.log("[keywords]\n\t- Whitelist: "+config.whitelist.join(', ')+"\n\t- Blacklist: "+config.blacklist.join(', '));
 console.log("\n");
@@ -154,14 +155,31 @@ app.post('/offers', function (req, res) {
 		return res.json({success: false, error: "Nothing to show"});
 
 	var id = req.body.id;
+	var query = req.body.query;
+
+	var base = offers.slice(0);
+
+	if (query) {
+		try {
+			query = query.split("\n");
+
+			query.forEach(condition => {
+				base = base.filter(offer => {
+					return eval(condition);
+				})
+			})
+		} catch (error) {
+			return res.json({success: false, error: error.message});
+		}
+	}
 
 	if (!id) {
-		var items = offers.slice(offers.length - 15, offers.length);
+		var items = base.slice(base.length - 15, base.length);
 	} else {
 		var index = null;
 
-		for (var i=0; i<offers.length; i++) {
-			if (id == offers[i].id) {
+		for (var i=0; i<base.length; i++) {
+			if (id == base[i].id) {
 				index = i;
 
 				break;
@@ -171,7 +189,7 @@ app.post('/offers', function (req, res) {
 		if (index === null)
 			return res.json({success: false, error: "The provided id doesn't match with any active offers"});
 
-		var items = offers.slice(Math.max(0, index - 15), index);
+		var items = base.slice(Math.max(0, index - 15), index);
 	}
 
 	return res.json({success: true, offers: items, avgSqrtPrice: {
@@ -269,6 +287,10 @@ var getOffers = function() {
 			if (config.blacklist.length && (offer.title+' '+offer.description).toLowerCase().match(new RegExp(config.blacklist.join('|')))) {
 				return false;
 			}
+
+			/* if (offers.filter(a => a.title == offer.title).length) {
+				return false;
+			} */
 
 			return true;
 		});
@@ -390,7 +412,7 @@ function updatePersistence() {
 
 function getAvgSqrtPrice(offers) {
 	const offersWithSquareAttribute = offers
-		.filter(offer => offer.attributes.square);
+		.filter(offer => offer.attributes.square > 0);
 
 	if (!offersWithSquareAttribute.length) {
 		return 0;

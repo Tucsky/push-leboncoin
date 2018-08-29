@@ -26,7 +26,8 @@
 
 	<div class="container">
 		<h1>{push} <div class="hidden-sm-down">leboncoin</div></h1>
-		<h2 id="average" style="display: none;">Average <span></span> <sup>/m²</sup></h2>
+		<h2 class="average" style="display: none;">All time average <span></span> <sup>/m²</sup></h2>
+		<h3 class="average" style="display: none;">Session average <span></span> <sup>/m²</sup></h3>
 		<div class="row row-masonry">
 			<div class="grid-sizer col-xs-12 col-sm-6 col-md-4"></div>
 			<div class="grid-item col-xs-12 col-sm-6 col-md-4">
@@ -45,6 +46,17 @@
 							<input type="text" readonly class="form-control token" placeholder="Token">
 						</div>
 						<a href="#" class="btn btn-danger" data-action="unsubscribe">Unsubscribe</a>
+					</div>
+				</div>
+			</div>
+			<div class="grid-item col-xs-12 col-sm-6 col-md-4">
+				<div id="filterBloc" class="card card-inverse" style="background-color: #333; border-color: #333;">
+					<div class="card-block">
+						<h4 class="card-title">Recherche</h4>
+						<div class="form-group">
+							<textarea id="term" class="form-control query" placeholder="/linge/.test(offer.description)"></textarea>
+						</div>
+						<a href="#" class="btn btn-primary" data-action="search">Rechercher</a>
 					</div>
 				</div>
 			</div>
