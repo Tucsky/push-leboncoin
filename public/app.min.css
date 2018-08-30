@@ -9690,8 +9690,10 @@ h3.average {
 
 .row-masonry .offer .card .offer-slider {
   height: 300px;
-  position: relative; }
-  .row-masonry .offer .card .offer-slider a {
+  position: relative;
+  cursor: -webkit-grab;
+  cursor: grab; }
+  .row-masonry .offer .card .offer-slider .offer-slide {
     height: 100%; }
   .row-masonry .offer .card .offer-slider img {
     display: block;

@@ -180,9 +180,9 @@ function showOffer(offer, top) {
 			${offer.images && offer.images.length ? `
 				<div class="card-img-top"><div class="offer-slider">
 					${offer.images.map(url => `
-						<a href="#">
-							<img class="tns-lazy-img" data-src="${url}" alt="${offer.title}">
-						</a>
+						<div class="offer-slide">
+							<img class="tns-lazy-img" data-src="${url.indexOf('http') === 0 ? url : 'img/leboncoin/' + url}" alt="${offer.title}">
+						</div>
 					`)}
 				</div></div>
 			` : ''}
@@ -192,11 +192,11 @@ function showOffer(offer, top) {
 				<div class="card-text card-text-overflow">
 					<p>${offer.description.replace(/\n/g, '<br>')}</p>
 				</div>
-				<div class="footer"> 
-					<small class="offer-ago">${moment(offer.date).fromNow()}</small> 
+				<div class="footer">
+					<small class="offer-ago">${moment(offer.date).fromNow()}</small>
 					<a href="${offer.link}" target="_blank" class="btn btn-primary" title="Show offer">
 						<i class="fa fa-shopping-cart"></i> <span class="offer-price">${offer.price} €</span>
-					</a> 
+					</a>
 				</div>
 			</div>
 		</div>

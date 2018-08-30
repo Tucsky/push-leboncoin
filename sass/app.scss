@@ -169,8 +169,9 @@ h3.average {
 			.offer-slider {
 				height: 300px;
 				position: relative;
+				cursor: grab;
 
-				a {
+				.offer-slide {
 					height: 100%;
 				}
 
